@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "223714025473",
+    "project_id": "moncierge",
+    "storage_bucket": "moncierge.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223714025473:android:6350d16d2ab61e048a6000",
+        "android_client_info": {
+          "package_name": "com.senihers_group8.moncierge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223714025473-fp35na8e1bren2s4svd07vr56kv69re0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4pV6UVf3Cb7aPwJgo9kyJ4eLe_g5ugkM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223714025473-fp35na8e1bren2s4svd07vr56kv69re0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

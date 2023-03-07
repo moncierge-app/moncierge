@@ -1,4 +1,3 @@
-import 'dart:ffi';
 enum PaymentModes {
   wallet,
   creditCard,
@@ -10,9 +9,9 @@ enum PaymentModes {
   upi
 }
 
-class Expenses{
+class Expenses {
   String expenseId = "000000"; //
-  String userId = "0000000";  // TO BE QUERIED FROM THE DATABASE
+  String userId = "0000000"; // TO BE QUERIED FROM THE DATABASE
   String budgetId = "0000000";
   DateTime timeOfExpenseAddition; // captured by the app at time of addition
   DateTime timeOfPayment; // Is the user going to enter this field?
@@ -26,26 +25,22 @@ class Expenses{
   // setters provided by the user
 
   // user will enter the amount spent
-  set changeAmount(double amount)
-  {
+  set changeAmount(double amount) {
     this.amount = amount;
   }
 
   // user will enter the category where amount was spent
-  set addCategoryForExpense(String category)
-  {
-    categories.add(category) ;
+  set addCategoryForExpense(String category) {
+    categories.add(category);
   }
 
   // user will enter the mode of payment
-  set setPaymentMode(PaymentModes paymentMode)
-  {
+  set setPaymentMode(PaymentModes paymentMode) {
     this.paymentMode = paymentMode;
   }
 
   // user will have to select the budget from the dropdown from which expense was made
-  set budgetIdForExpense(String budgetId)
-  {
+  set budgetIdForExpense(String budgetId) {
     this.budgetId = budgetId;
   }
 
@@ -53,32 +48,31 @@ class Expenses{
   // set setReceiver(User receiver)
   // this.receiver = receiver
 
-  String get getUserId
-  {
+  String get getUserId {
     return userId;
   }
-  String get getBudgetId
-  {
+
+  String get getBudgetId {
     return budgetId;
   }
-  double get getAmountSpent
-  {
+
+  double get getAmountSpent {
     return amount;
   }
-  PaymentModes get getPaymentMode
-  {
+
+  PaymentModes get getPaymentMode {
     return paymentMode;
   }
-  List<String> get getCategories
-  {
+
+  List<String> get getCategories {
     return categories;
   }
-  DateTime get getDateAndTimeOfPayment
-  {
+
+  DateTime get getDateAndTimeOfPayment {
     return timeOfPayment;
   }
-  DateTime get getDateAndTimeOfExpenseAddition
-  {
+
+  DateTime get getDateAndTimeOfExpenseAddition {
     return timeOfExpenseAddition;
   }
   // User get getReceiver
@@ -86,28 +80,24 @@ class Expenses{
   //   return receiver;
   // }
 
-  void updateExpenses(Expenses expense, double amount)
-  {
+  void updateExpenses(Expenses expense, double amount) {
     expense.amount = amount;
   }
 
-  Expenses({
-    required this.userId,
-    required this.budgetId,
-    required this.expenseId,
-    required this.amount,
-    required this.categories,
-    required this.paymentMode,
-    required this.timeOfExpenseAddition,
-    required this.timeOfPayment
-    // required this.receiver
-  });
-
+  Expenses(
+      {required this.userId,
+      required this.budgetId,
+      required this.expenseId,
+      required this.amount,
+      required this.categories,
+      required this.paymentMode,
+      required this.timeOfExpenseAddition,
+      required this.timeOfPayment
+      // required this.receiver
+      });
 }
 
-void main()
-{
-}
+void main() {}
 
 
 /**
