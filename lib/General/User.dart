@@ -1,10 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 class User {
   // Creating Field inside the class
 
   var currentUser;
 
-  late String email;
-  late String password;
+  late String email = "sample@gmail.com";
+  late String password = "sample";
   late String name;
   late String phoneNumber;
   late User supervisorOfBudgets;
@@ -62,26 +64,46 @@ class User {
     return budgetIDs;
   }
 
-  //Functions
-  int login(String email, String password) {
+  //Authentication with Firebase
+  
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  get user => _auth.currentUser;
 
-    //TODO: compare with password obtained from Firebase?
-    if(password != 'pass123') {
-      currentUser = null;
-      return 1;
+ //SIGN UP METHOD
+  Future signUp({required String email, required String password}) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return e.message;
     }
-
-    currentUser = email;
-    return 0;
   }
 
-  void logout(String email) {
+  //SIGN IN METHOD
+  Future signIn({required String email, required String password}) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      currentUser = email;
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return e.message;
+    }
+  }
+
+  //SIGN OUT METHOD
+  Future signOut() async {
+    await _auth.signOut();
     currentUser = null;
+    print('signed out');
   }
+
 }
 
 void main() {
-  User s1 = new User();
+  User s1 = User();
   s1.email = 'kavyabhat@gmail.com';
   print(s1.email);
 }
