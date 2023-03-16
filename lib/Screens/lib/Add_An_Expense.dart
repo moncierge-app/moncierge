@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:email_validator/email_validator.dart';
 
-
 class AddAnExpensePage extends StatefulWidget {
   @override
   _AddAnExpensePageState createState() => _AddAnExpensePageState();
@@ -22,7 +21,6 @@ class _AddAnExpensePageState extends State<AddAnExpensePage> {
   }
 }
 
-
 // Create a Form widget.
 class MyCustomForm extends StatefulWidget {
   @override
@@ -31,13 +29,14 @@ class MyCustomForm extends StatefulWidget {
   }
 }
 
-
 // Create a corresponding State class, which holds data related to the form.
 class MyCustomFormState extends State<MyCustomForm> {
   // Create a global key that uniquely identifies the Form widget
   // and allows validation of the form.
   final _formKey = GlobalKey<FormState>();
   DateTime _selectedDate = DateTime.now();
+  String? _selectedCategory;
+
   late DateTime _expenseAdditionDate;
   final TextEditingController _dateController = TextEditingController();
 
@@ -62,24 +61,37 @@ class MyCustomFormState extends State<MyCustomForm> {
               return null;
             },
           ),
+          // TextFormField(
+          //   decoration: const InputDecoration(
+          //     icon: const Icon(Icons.phone),
+          //     hintText: 'Enter a phone number',
+          //     labelText: 'Phone',
+          //   ),
+          //   validator: (value) {
+          //     if (value!.isEmpty) {
+          //       return 'Please enter valid phone number';
+          //     }
+          //     return null;
+          //   },
+          // ),
           TextFormField(
             decoration: const InputDecoration(
-              icon: const Icon(Icons.phone),
-              hintText: 'Enter a phone number',
-              labelText: 'Phone',
+              icon: const Icon(Icons.currency_rupee),
+              hintText: 'Enter Amount Spent',
+              labelText: 'Amount',
             ),
             validator: (value) {
               if (value!.isEmpty) {
-                return 'Please enter valid phone number';
+                return 'Please enter some text';
               }
               return null;
             },
           ),
           TextFormField(
             decoration: const InputDecoration(
-              icon: const Icon(Icons.currency_rupee),
-              hintText: 'Enter Amount Spent',
-              labelText: 'Amount',
+              icon: const Icon(Icons.payments_rounded),
+              hintText: 'Whom was the payment done to',
+              labelText: 'Paid To',
             ),
             validator: (value) {
               if (value!.isEmpty) {
@@ -96,7 +108,6 @@ class MyCustomFormState extends State<MyCustomForm> {
             ),
             validator: (value) {
               if (value!.isEmpty) {
-
                 return 'This field cant remain empty.';
               }
               if (!EmailValidator.validate(value)) {
@@ -105,9 +116,44 @@ class MyCustomFormState extends State<MyCustomForm> {
               return null;
             },
           ),
+          DropdownButtonFormField(
+            decoration: InputDecoration(
+              icon: const Icon(Icons.category),
+              hintText: 'Select a category',
+              labelText: 'Category',
+            ),
+            value: _selectedCategory,
+            items: [
+              DropdownMenuItem(
+                value: 'Option 1',
+                child: Text('Option 1'),
+              ),
+              DropdownMenuItem(
+                value: 'Option 2',
+                child: Text('Option 2'),
+              ),
+              DropdownMenuItem(
+                value: 'Option 3',
+                child: Text('Option 3'),
+              ),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _selectedCategory = value;
+              });
+            },
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'This field cant remain empty.';
+              }
+
+              return null;
+            },
+          ),
+
           TextFormField(
             controller: _dateController,
-            decoration:  InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Choose the date of payment',
               labelText: 'Date of Payment',
               prefixIcon: IconButton(
@@ -123,22 +169,19 @@ class MyCustomFormState extends State<MyCustomForm> {
               return null;
             },
           ),
-
           new Container(
-              padding: const EdgeInsets.only(left: 150.0, top: 40.0),
+              padding: const EdgeInsets.only(left: 150.0, top: 0.0),
               child: new ElevatedButton(
                 child: const Text('Submit'),
                 onPressed: () {
                   // It returns true if the form is valid, otherwise returns false
                   if (_formKey.currentState!.validate()) {
                     // If the form is valid, display a Snackbar.
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text('Data is in processing.')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Data is in processing.')));
+                  } else {
+                    _expenseAdditionDate = DateTime.now();
                   }
-                  else
-                    {
-                      _expenseAdditionDate = DateTime.now();
-                    }
                 },
               )),
         ],

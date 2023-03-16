@@ -10,13 +10,34 @@ class ExpensesPage extends StatefulWidget {
 }
 
 // Replace this List with the list fetched from the database
-
 // To Be Replaced
+String payment_Date = DateFormat('dd/MM/yyyy').format(DateTime.now());
 List<Map<String, dynamic>> products = [
   {
-    'Date of Payment': 1,
+    'Date of Payment': "16/03/23",
     'Paid To': 'Product 1',
     'Category': 'flight ticket',
+    'Payment Mode': "UPI",
+    'Amount Spent': 40.00
+  },
+  {
+    'Date of Payment': "16/03/23",
+    'Paid To': 'Product 1',
+    'Category': 'food',
+    'Payment Mode': "UPI",
+    'Amount Spent': 40.00
+  },
+  {
+    'Date of Payment': "16/03/23",
+    'Paid To': 'Product 1',
+    'Category': 'travel',
+    'Payment Mode': "UPI",
+    'Amount Spent': 40.00
+  },
+  {
+    'Date of Payment': "16/03/23",
+    'Paid To': 'Product 1',
+    'Category': 'miscellaneous',
     'Payment Mode': "UPI",
     'Amount Spent': 40.00
   },
@@ -27,6 +48,12 @@ DateTime date_Of_Expiry = DateTime.now();
 
 String formatted_Date_Of_Expiry =
     DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
+
+// To Be Replaced
+DateTime date_Of_Creation = DateTime.now();
+
+String formatted_Date_Of_Creation =
+DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
 
 class _ExpensesPageState extends State<ExpensesPage> {
   final TextEditingController _textEditingController = TextEditingController();
@@ -78,6 +105,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
             TextButton(
               child: Text('SAVE'),
               onPressed: () {
+
                 if (_textEditingController.text.isNotEmpty &&
                     double.tryParse(_textEditingController.text) != null) {
                   setState(() {
@@ -106,8 +134,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
             child: Column(children: <Widget>[
               SizedBox(height: 20),
               Container(
-                height: 50,
-                width: 200,
+                height: 40,
+                width: 250,
                 decoration: BoxDecoration(
                     color: Colors.blue,
                     borderRadius: BorderRadius.circular(10)),
@@ -127,7 +155,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Container(
                   padding: EdgeInsets.all(16.0),
                   child: Column(
@@ -165,65 +193,77 @@ class _ExpensesPageState extends State<ExpensesPage> {
 
                       Row(
                         children: [
-                          Text("Threshold Amount: "),
+                          Text("Date of Creation : "),
                           Expanded(
-                            child: Text("$threshold_Amount"),
+                            child: Text("$formatted_Date_Of_Creation"),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 10), // add space between rows
+
+                      Row(
+                        children: [
+                          Text("Amount Spent : "),
+                          Expanded(
+                            child: Text("$current_Expense"),
                           ),
                         ],
                       ),
                     ],
                   )),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Container(
-                margin: EdgeInsets.all(1),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      controller: _scrollController,
-                      child: Flexible(
-                        child: DataTable(
-                          //columnWidth: {0: FixedColumnWidth(100)}, // set width of the first column
-                          columns: [
-                            DataColumn(label: Text('Date ')),
-                            DataColumn(label: Text('Paid to')),
-                            DataColumn(
-                                label: Text(
-                                    'Category')), // Budget info : threshold : chart green : added an expense
-                            DataColumn(label: Text('Mode')),
-                            DataColumn(label: Text('Amount')),
-                          ],
-                          rows: List<DataRow>.generate(
-                            products.length,
-                            (index) => DataRow(
-                              cells: [
-                                DataCell(Text(products[index]['Date of Payment']
-                                    .toString())),
-                                DataCell(Text(products[index]['Paid To'])),
-                                DataCell(Text(
-                                    products[index]['Category'].toString())),
-                                DataCell(Text(products[index]['Payment Mode']
-                                    .toString())),
-                                DataCell(
-                                  GestureDetector(
-                                    child: Row(
-                                      children: [
-                                        Text(products[index]['Amount Spent']
-                                            .toString()),
-                                        Icon(Icons.edit),
-                                      ],
-                                    ),
-                                    onTap: () {
-                                      _showEditDialog(index);
-                                      // do something when the icon is clicked
-                                    },
-                                  ),
-                                ),
-                              ],
+                    scrollDirection: Axis.vertical,
+                    controller: _scrollController,
+                    child: FittedBox(
+                      child: DataTable(
+                        columnSpacing: 10,
+                        columns: [
+                          DataColumn(
+                            label: Text(
+                              'Paid On' ,
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
+                              maxLines: 3,
                             ),
                           ),
+                          DataColumn(label: Text('Paid to')),
+                          DataColumn(label: Text('Category')),
+                          DataColumn(label: Text('Amount')),
+                          DataColumn(label: Text('Mode')),
+                        ],
+                        rows: List<DataRow>.generate(
+                          products.length,
+                              (index) => DataRow(
+                            cells: [
+                              DataCell(Text(products[index]['Date of Payment'].toString())),
+                              DataCell(Text(products[index]['Paid To'])),
+                              DataCell(Text(products[index]['Category'].toString())),
+                              DataCell(
+                                GestureDetector(
+                                  child: Row(
+                                    children: [
+                                      Text(products[index]['Amount Spent'].toString()),
+                                      Icon(Icons.edit),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    _showEditDialog(index);
+                                  },
+                                ),
+                              ),
+                              DataCell(Text(products[index]['Payment Mode'].toString())),
+
+                            ],
+                          ),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ]),
