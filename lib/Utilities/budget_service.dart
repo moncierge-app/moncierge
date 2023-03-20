@@ -2,7 +2,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Budget_Utils {
+class BudgetUtils {
   // To check if a user with given userID exists or not
   Future<bool> checkIfUserExists(String userID) async {
     final userDocument =
@@ -49,8 +49,7 @@ class Budget_Utils {
       var budgetCollection = FirebaseFirestore.instance.collection('Budget');
       await budgetCollection.doc(budgetID).set({
         'budgetName': budgetName,
-        'creationTime':
-            creationTime.day + creationTime.month + creationTime.year,
+        'creationTime': creationTime,
         'endTime': endTime,
         'totalAmount': totalAmount,
         'amountUsed': 0
@@ -125,61 +124,66 @@ class Budget_Utils {
       DateTime timestampAdded,
       DateTime timestampPaymentMade) async {
     try {
-      var expenseCollection = FirebaseFirestore.instance.collection('Expense');
+      if (await checkExpenseValid(budgetID, timestampAdded)) {
+        var expenseCollection =
+            FirebaseFirestore.instance.collection('Expense');
 
-      // Convert datetimestamp to string and convert to second precision
-      String timeStampAddedString = timestampAdded.toString();
-      timeStampAddedString =
-          timeStampAddedString.substring(0, timeStampAddedString.length - 7);
-      String timestampPaymentMadeString = timestampPaymentMade.toString();
-      timestampPaymentMadeString = timestampPaymentMadeString.substring(
-          0, timestampPaymentMadeString.length - 7);
-      String expenseID = '$creatorID|$timeStampAddedString';
+        // Convert datetimestamp to string and convert to second precision
+        String timeStampAddedString = timestampAdded.toString();
+        timeStampAddedString =
+            timeStampAddedString.substring(0, timeStampAddedString.length - 7);
+        String expenseID = '$creatorID|$timeStampAddedString';
 
-      // Create an expense document
-      expenseCollection.doc(expenseID).set({
-        'userID': creatorID,
-        'budgetID': budgetID,
-        'amount': amount,
-        'category': category,
-        'paymentMode': paymentMode,
-        'receiver': receiver,
-        'description': description,
-        'timestampAdded': timeStampAddedString,
-        'timestampPaymentMade': timestampPaymentMadeString
-      });
+        // Create an expense document
+        expenseCollection.doc(expenseID).set({
+          'userID': creatorID,
+          'budgetID': budgetID,
+          'amount': amount,
+          'category': category,
+          'paymentMode': paymentMode,
+          'receiver': receiver,
+          'description': description,
+          'timestampAdded': timestampAdded,
+          'timestampPaymentMade': timestampPaymentMade
+        });
 
-      //Update budget document
-      var budgetCollection = FirebaseFirestore.instance.collection('Budget');
+        //Update budget document
+        var budgetCollection = FirebaseFirestore.instance.collection('Budget');
 
-      // Add expense in budget
-      budgetCollection
-          .doc(budgetID)
-          .collection('Expenses')
-          .doc(expenseID)
-          .set({});
+        // Add expense in budget
+        budgetCollection
+            .doc(budgetID)
+            .collection('Expenses')
+            .doc(expenseID)
+            .set({});
 
-      // Update used amount in budget
-      var budgetDocument = await budgetCollection.doc(budgetID).get();
-      budgetCollection
-          .doc(budgetID)
-          .update({'amountUsed': amount + budgetDocument['amountUsed']});
+        // Update used amount in budget
+        var budgetDocument = await budgetCollection.doc(budgetID).get();
+        budgetCollection
+            .doc(budgetID)
+            .update({'amountUsed': amount + budgetDocument['amountUsed']});
 
-      // Update used amount in category
-      var categoryDocument = await budgetCollection
-          .doc(budgetID)
-          .collection('Categories')
-          .doc(category)
-          .get();
-      await budgetCollection
-          .doc(budgetID)
-          .collection('Categories')
-          .doc(category)
-          .update({'amountUsed': categoryDocument['amountUsed'] + amount});
+        // Update used amount in category
+        var categoryDocument = await budgetCollection
+            .doc(budgetID)
+            .collection('Categories')
+            .doc(category)
+            .get();
+        await budgetCollection
+            .doc(budgetID)
+            .collection('Categories')
+            .doc(category)
+            .update({'amountUsed': categoryDocument['amountUsed'] + amount});
 
-      // Check if limit exceeded here
-
-      return true;
+        //if limit exceeded
+        Future<String> msg = checkLimitExceeded(budgetID, expenseID);
+        if (msg != '') {
+          // TODO: Notify the corresponding users about exceeded limit
+        }
+        return true;
+      } else {
+        return false;
+      }
     } catch (exception) {
       return false;
     }
