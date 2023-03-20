@@ -7,7 +7,7 @@ final CollectionReference _userCollection = _db.collection('User');
 //TODO: Add validation for email, password and phoneNumber
 //TODO: Allow optional parameters for addUser() and updateUser()
 
-class User_Utils {
+class UserUtils {
 
   //add user with given inputs
   static Future<void> addUser(String email, String password, String name, String phoneNumber, List<String> supervisorOfBudgets, List<String> budgetIDs) async {
