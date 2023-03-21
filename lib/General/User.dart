@@ -9,8 +9,8 @@ class User {
   late String password = "sample";
   late String name;
   late String phoneNumber;
-  late User supervisorOfBudgets;
-  late List<int> budgetIDs;
+  late List<String> supervisorOfBudgets; //list of budget IDs pointing to budgets that the user supervises
+  late List<String> budgetIDs; // list of budgets that the user is a member of
 
   // Setters
   set changeUserEmail(String email) {
@@ -30,11 +30,11 @@ class User {
     this.phoneNumber = phoneNumber;
   }
 
-  set addSupervisor(User supervisor) {
-    supervisorOfBudgets = supervisor;
+  set addSupervisedBudget(String id) {
+    supervisorOfBudgets.add(id);
   }
 
-  set addBudgetID(int id) {
+  set addBudgetID(String id) {
     budgetIDs.add(id);
   }
 
@@ -56,11 +56,11 @@ class User {
     return phoneNumber;
   }
 
-  User get supervisor {
+  List<String> get supervisor {
     return supervisorOfBudgets;
   }
 
-  List<int> get budgets {
+  List<String> get budgets {
     return budgetIDs;
   }
 
