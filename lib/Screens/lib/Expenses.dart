@@ -45,12 +45,6 @@ List<Map<String, dynamic>> products = [
   },
 ];
 
-Map<String, double> dataMap = {
-  "Flutter": 5,
-  "React Native": 3,
-  "Xamarin": 2,
-  "Ionic": 1,
-};
 
 
 Map<String, double> GetMap(List<Map<String, dynamic>> products )
