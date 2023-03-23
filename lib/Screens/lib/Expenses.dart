@@ -1,5 +1,5 @@
 import 'package:first_app/main.dart';
-import 'package:first_app/Add_An_Expense.dart';
+import 'package:first_app/Screens/lib/Add_An_Expense.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter/main.dart';
 import 'package:intl/intl.dart';
@@ -53,7 +53,7 @@ String formatted_Date_Of_Expiry =
 DateTime date_Of_Creation = DateTime.now();
 
 String formatted_Date_Of_Creation =
-DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
+    DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
 
 class _ExpensesPageState extends State<ExpensesPage> {
   final TextEditingController _textEditingController = TextEditingController();
@@ -105,7 +105,6 @@ class _ExpensesPageState extends State<ExpensesPage> {
             TextButton(
               child: Text('SAVE'),
               onPressed: () {
-
                 if (_textEditingController.text.isNotEmpty &&
                     double.tryParse(_textEditingController.text) != null) {
                   setState(() {
@@ -225,7 +224,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                         columns: [
                           DataColumn(
                             label: Text(
-                              'Paid On' ,
+                              'Paid On',
                               overflow: TextOverflow.visible,
                               softWrap: true,
                               maxLines: 3,
@@ -238,16 +237,19 @@ class _ExpensesPageState extends State<ExpensesPage> {
                         ],
                         rows: List<DataRow>.generate(
                           products.length,
-                              (index) => DataRow(
+                          (index) => DataRow(
                             cells: [
-                              DataCell(Text(products[index]['Date of Payment'].toString())),
+                              DataCell(Text(products[index]['Date of Payment']
+                                  .toString())),
                               DataCell(Text(products[index]['Paid To'])),
-                              DataCell(Text(products[index]['Category'].toString())),
+                              DataCell(
+                                  Text(products[index]['Category'].toString())),
                               DataCell(
                                 GestureDetector(
                                   child: Row(
                                     children: [
-                                      Text(products[index]['Amount Spent'].toString()),
+                                      Text(products[index]['Amount Spent']
+                                          .toString()),
                                       Icon(Icons.edit),
                                     ],
                                   ),
@@ -256,8 +258,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
                                   },
                                 ),
                               ),
-                              DataCell(Text(products[index]['Payment Mode'].toString())),
-
+                              DataCell(Text(
+                                  products[index]['Payment Mode'].toString())),
                             ],
                           ),
                         ),

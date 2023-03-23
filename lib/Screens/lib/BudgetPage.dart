@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:first_app/Expenses.dart';
+import 'package:first_app/Screens/lib/Expenses.dart';
+
 // To Be Replaced
 List<String> budgets = [
   "Travel",
@@ -20,6 +21,7 @@ List<String> users_supervisor = [
 ];
 
 const num_item_to_be_displayed = 2;
+
 class BudgetPage extends StatefulWidget {
   const BudgetPage({Key? key}) : super(key: key);
 
@@ -41,9 +43,7 @@ class _BudgetPage extends State<BudgetPage> {
             width: double.infinity,
             decoration: BoxDecoration(color: Colors.blue.shade800),
             child: Text("Welcome to Moncierge",
-                style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.white)),
+                style: TextStyle(fontSize: 30, color: Colors.white)),
           ),
         ),
         Expanded(
@@ -75,7 +75,7 @@ class _BudgetPage extends State<BudgetPage> {
                   ),
                   width: MediaQuery.of(context).size.width,
                   padding:
-                  EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,9 +101,7 @@ class _BudgetPage extends State<BudgetPage> {
                         padding: EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 10.0),
                         child: FloatingActionButton(
-                          onPressed: () {
-
-                          },
+                          onPressed: () {},
                           backgroundColor: Color.fromARGB(255, 161, 154, 239),
                           child: Icon(Icons.add),
                         ),
@@ -172,8 +170,8 @@ ListView _buildListView() {
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                 child: FloatingActionButton(
                   onPressed: () {
-                    Navigator.push(
-                        context, MaterialPageRoute(builder: (_) => ExpensesPage()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ExpensesPage()));
                   },
                   backgroundColor: Color.fromARGB(255, 154, 202, 239),
                   child: Icon(Icons.arrow_forward),
@@ -186,8 +184,6 @@ ListView _buildListView() {
     ),
   );
 }
-
-
 
 ListView _buildListViewSupervisor(List<String> myList) {
   return ListView.builder(
@@ -242,9 +238,7 @@ ListView _buildListViewSupervisor(List<String> myList) {
                 alignment: Alignment.center,
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                 child: FloatingActionButton(
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   backgroundColor: Color.fromARGB(255, 154, 202, 239),
                   child: Icon(Icons.arrow_forward),
                 ),

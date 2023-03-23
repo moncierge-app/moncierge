@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:first_app/General/User.dart';
+import 'package:first_app/Screens/lib/BudgetPage.dart';
+import 'package:first_app/Utilities/user_utils.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -45,7 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'First Name'),
-                obscureText: true,
+                obscureText: false,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter your First Name';
@@ -54,20 +57,10 @@ class _SignUpPageState extends State<SignUpPage> {
                 },
                 onSaved: (value) => _firstName = value!,
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Last Name'),
-                obscureText: true,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your Last Name';
-                  }
-                  return null;
-                },
-                onSaved: (value) => _lastName = value!,
-              ),
+
               TextFormField(
                 decoration: InputDecoration(labelText: 'Mobile No'),
-                obscureText: true,
+                obscureText: false,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter your Mobile Number';
@@ -82,7 +75,25 @@ class _SignUpPageState extends State<SignUpPage> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
-                      // TODO: Implement sign-up logic
+
+                      User new_user = User();
+                      new_user.email = _email.toString();
+                      new_user.password = _password.toString();
+
+                      //Firebase authentication
+                      new_user.signUp(
+                          email: new_user.email, password: new_user.password);
+
+                      //Add new user to database
+                      UserUtils.addNewUser(
+                          new_user.email,
+                          new_user.password,
+                          new_user.name,
+                          new_user.phoneNumber);
+
+                      //Load budgets of the user
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => BudgetPage()));
                     }
                   },
                   child: Text('Sign Up'),
