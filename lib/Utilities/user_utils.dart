@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:moncierge/General/User.dart';
+import 'package:first_app/General/User.dart';
 
 final FirebaseFirestore _db = FirebaseFirestore.instance;
 final CollectionReference _userCollection = _db.collection('User');
@@ -8,9 +8,12 @@ final CollectionReference _userCollection = _db.collection('User');
 //TODO: Allow optional parameters for addUser() and updateUser()
 
 class UserUtils {
-
   //add user with given inputs
-  static Future<void> addUser(String email, String password, String name, String phoneNumber, List<String> supervisorOfBudgets, List<String> budgetIDs) async {
+  static Future<void> addNewUser(
+      String email,
+      String password,
+      String name,
+      String phoneNumber) async {
     Map<String, dynamic> data = <String, dynamic>{
       "email": email,
       "password": password,
@@ -18,32 +21,50 @@ class UserUtils {
       "phoneNumber": phoneNumber
     };
 
-    // add list of budgets supervised as subcollection 
-    for (var i = 0; i < supervisorOfBudgets.length; i++) {
-      await _userCollection
-          .doc(email)
-          .collection('Supervises')
-          .doc(supervisorOfBudgets[i])
-          .set({});
-    }
-
-    // add list of budgets that user is a part of
-    for (var i = 0; i < budgetIDs.length; i++) {
-      await _userCollection
-          .doc(email)
-          .collection('Budgets')
-          .doc(budgetIDs[i])
-          .set({});
-    }
-
-    await _userCollection.doc(email)
+    await _userCollection
+        .doc(email)
         .set(data)
         .whenComplete(() => print("User added to the database"))
         .catchError((e) => print(e));
   }
 
+  static Future<void> forgotPassword(
+      String email,
+      String password) async {
+    Map<String, dynamic> data = <String, dynamic>{
+      "email": email,
+      "password": password
+    };
+
+    await _userCollection
+        .doc(email)
+        .update(data)
+        .whenComplete(() => print("Password updated in the database"))
+        .catchError((e) => print(e));
+  }
+
+  static Future<void> addSupervisor(
+      String email, String supervisorOfBudgets) async {
+    // add budget being supervised as subcollection
+    await _userCollection
+        .doc(email)
+        .collection('Supervises')
+        .doc(supervisorOfBudgets)
+        .set({});
+  }
+
+  static Future<void> addBudgetID(String email, String budgetID) async {
+    // add list of budgets that user is a part of
+    await _userCollection
+        .doc(email)
+        .collection('Budgets')
+        .doc(budgetID)
+        .set({});
+  }
+
   // update User details
-  static Future<void> updateItem(String email, String password, String name, String phoneNumber) async {
+  static Future<void> updateUserProfile(
+      String email, String password, String name, String phoneNumber) async {
     DocumentReference documentReferencer = _userCollection.doc(email);
 
     Map<String, dynamic> data = <String, dynamic>{

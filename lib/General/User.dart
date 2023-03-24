@@ -9,7 +9,8 @@ class User {
   late String password = "sample";
   late String name;
   late String phoneNumber;
-  late List<String> supervisorOfBudgets; //list of budget IDs pointing to budgets that the user supervises
+  late List<String>
+      supervisorOfBudgets; //list of budget IDs pointing to budgets that the user supervises
   late List<String> budgetIDs; // list of budgets that the user is a member of
 
   // Setters
@@ -42,12 +43,7 @@ class User {
   String get userEmail {
     return email;
   }
-
-  // TODO: Unneccessary function?
-  String get userPassword {
-    return password;
-  }
-
+  
   String get userName {
     return name;
   }
@@ -65,11 +61,11 @@ class User {
   }
 
   //Authentication with Firebase
-  
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   get user => _auth.currentUser;
 
- //SIGN UP METHOD
+  //SIGN UP METHOD
   Future signUp({required String email, required String password}) async {
     try {
       await _auth.createUserWithEmailAndPassword(
@@ -83,13 +79,14 @@ class User {
   }
 
   //SIGN IN METHOD
-  Future signIn({required String email, required String password}) async {
+  Future<bool> signIn({required String email, required String password}) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       currentUser = email;
-      return null;
+      return true;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      //return e.message.toString();
+      return false;
     }
   }
 
@@ -99,7 +96,6 @@ class User {
     currentUser = null;
     print('signed out');
   }
-
 }
 
 void main() {
