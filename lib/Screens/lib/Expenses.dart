@@ -3,6 +3,8 @@ import 'package:first_app/Screens/lib/Add_An_Expense.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter/main.dart';
 import 'package:intl/intl.dart';
+import 'package:pie_chart/pie_chart.dart';
+
 
 class ExpensesPage extends StatefulWidget {
   @override
@@ -32,22 +34,38 @@ List<Map<String, dynamic>> products = [
     'Paid To': 'Product 1',
     'Category': 'travel',
     'Payment Mode': "UPI",
-    'Amount Spent': 40.00
+    'Amount Spent': 10.00
   },
   {
     'Date of Payment': "16/03/23",
     'Paid To': 'Product 1',
     'Category': 'miscellaneous',
     'Payment Mode': "UPI",
-    'Amount Spent': 40.00
+    'Amount Spent': 30.00
   },
 ];
+
+
+
+Map<String, double> GetMap(List<Map<String, dynamic>> products )
+{
+  Map<String, double> datamap = products.fold({}, (Map<String, double> acc, product) {
+    String category = product['Category'];
+    double amount = product['Amount Spent'];
+    acc.update(category, (value) => value + amount, ifAbsent: () => amount);
+    return acc;
+  });
+
+
+  return datamap;
+}
+
 
 // To Be Replaced
 DateTime date_Of_Expiry = DateTime.now();
 
 String formatted_Date_Of_Expiry =
-    DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
+DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
 
 // To Be Replaced
 DateTime date_Of_Creation = DateTime.now();
@@ -129,7 +147,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
           appBar: AppBar(
             title: Text('Transaction Details'),
           ),
-          body: Center(
+          body: SingleChildScrollView(
             child: Column(children: <Widget>[
               SizedBox(height: 20),
               Container(
@@ -268,12 +286,40 @@ class _ExpensesPageState extends State<ExpensesPage> {
                   ),
                 ),
               ),
+              SizedBox(height: 10),
+              Container(
+                child: Column(
+                  children: [
+                    PieChart(
+                      dataMap: GetMap(products),
+                      chartRadius: MediaQuery.of(context).size.width / 2.7,
+                      legendOptions: LegendOptions(
+                        legendTextStyle: TextStyle(fontSize: 16),
+                        showLegendsInRow: false,
+                        legendPosition: LegendPosition.right,
+                      ),
+                      chartValuesOptions: ChartValuesOptions(
+                        showChartValueBackground: true,
+                        showChartValues: true,
+                        showChartValuesInPercentage: true,
+                        showChartValuesOutside: true,
+                        decimalPlaces: 1,
+                      ),
+                    ),
+
+                  ],
+                ),
+
+
+              ),
+
             ]),
             //child:
           )),
     );
   }
 }
+
 
 // STATIC Table code :
 

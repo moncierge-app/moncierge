@@ -1,30 +1,41 @@
+import 'dart:html';
+import 'Add_Budget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:first_app/Screens/lib/Expenses.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
-// To Be Replaced
-List<String> budgets = [
-  "Travel",
-  "Food",
-  "College_Expenses",
-  "1",
-  "2",
-  "4",
-  "4"
+List<List<String>> membersId = [
+  ["abc@gmail.com", "shakshi@gmail.com"],
+  ["saurav@gmail.com", "sachi@gmail.com", "Rohan@gmail.com"],
+  ["priyu@gmail.com", "kailash@gmail.com"],
+  ["shakshi@gmail.com"],
+  []
 ];
 
-// To Be Replaced
-List<String> users_supervisor = [
-  "Son",
-  "Daughter",
-  "Student",
+List<List<String>> supervisorId = [
+  ["abc@gmail.com", "shakshi@gmail.com"],
+  ["saurav@gmail.com", "sachi@gmail.com", "Rohan@gmail.com"],
+  ["priyu@gmail.com", "kailash@gmail.com"],
+  ["shakshi@gmail.com"],
+  []
 ];
 
-const num_item_to_be_displayed = 2;
+List<String> budgets = ["Travel", "Food", "College", "stationary", "shaid"];
+List<num> current_expense = [
+  200.00,
+  300.20,
+  2000,
+  2000,
+  2000,
+];
+List<num> total_expense = [1000.00, 500.00, 5000, 5000, 6000];
+final now = DateTime.now();
+DateTime date = new DateTime(now.year, now.month, now.day);
+List<DateTime> creationTime = [date, date, date, date, date];
+List<DateTime> endTime = [date, date, date, date, date];
 
 class BudgetPage extends StatefulWidget {
   const BudgetPage({Key? key}) : super(key: key);
-
   @override
   State<BudgetPage> createState() => _BudgetPage();
 }
@@ -33,102 +44,95 @@ class _BudgetPage extends State<BudgetPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: Column(children: [
-        Expanded(
-          flex: 0,
-          child: Container(
-            alignment: Alignment.center,
-            height: 100,
-            width: double.infinity,
-            decoration: BoxDecoration(color: Colors.blue.shade800),
-            child: Text("Welcome to Moncierge",
-                style: TextStyle(fontSize: 30, color: Colors.white)),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: _buildListView(),
-        ),
-        Expanded(
-          flex: 1,
-          child: _buildListViewSupervisor(users_supervisor),
-        ),
-        Expanded(
-          flex: 0,
-          child: ListView.builder(
-            itemCount: 1,
-            shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) => Container(
+        backgroundColor: Colors.grey[300],
+        body: SingleChildScrollView(
+          child: Column(children: [
+            Container(
+                padding: const EdgeInsets.fromLTRB(150, 20, 20, 20),
+                height: 100.0,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  color: Color.fromARGB(255, 29, 45, 128),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(0),
+                    topRight: Radius.circular(0),
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  ),
+                ),
+                child: Text('My Budgets',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                    ))),
+            Container(
+              margin: const EdgeInsets.fromLTRB(10, 30, 10, 10),
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-              height: 100,
-              child: Card(
-                elevation: 5.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0.0),
-                ),
-                child: Container(
-                  decoration: new BoxDecoration(
-                    borderRadius: new BorderRadius.circular(0.0),
-                    color: Color.fromARGB(255, 166, 232, 229),
+              height: 50,
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  new BoxShadow(
+                    color: Colors.grey.shade600,
+                    blurRadius: 10,
+                    spreadRadius: 2,
                   ),
-                  width: MediaQuery.of(context).size.width,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.all(10),
-                            // color: Colors.blue.shade200,
-
-                            child: Text("Create new Budget",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 30.0,
-                                    fontStyle: FontStyle.italic)),
-                          ),
-                          SizedBox(width: 5.0),
-                        ],
-                      ),
-                      Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 10.0),
-                        child: FloatingActionButton(
-                          onPressed: () {},
-                          backgroundColor: Color.fromARGB(255, 161, 154, 239),
-                          child: Icon(Icons.add),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
+              child: Row(children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: FloatingActionButton(
+                    heroTag: 'create_budget',
+                    onPressed: () {
+                      // _showSupervisedDialogBox(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddSupervisorBudget()));
+                    },
+                    backgroundColor: Color.fromARGB(255, 166, 241, 238),
+                    child: Icon(Icons.add),
+                  ),
+                ),
+                Text("new",
+                    style: TextStyle(
+                      fontSize: 28,
+                    )),
+                Text(" Budget",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    )),
+              ]),
             ),
-          ),
-        )
-      ]),
-    );
+            Container(
+              child: _buildListView(),
+            ),
+          ]),
+        ));
   }
 }
 
 ListView _buildListView() {
   return ListView.builder(
-    itemCount: num_item_to_be_displayed,
+    itemCount: budgets.length,
     shrinkWrap: true,
     itemBuilder: (BuildContext context, int index) => Container(
+      // double width = MediaQuery. of(context). size. width,
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       child: Card(
         elevation: 5.0,
+        color: Color.fromARGB(211, 186, 104, 200),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0.0),
+          borderRadius: BorderRadius.circular(14.0),
         ),
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -140,108 +144,201 @@ ListView _buildListView() {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Container(
-                    width: 55.0,
-                    height: 55.0,
-                    // color: Colors.blue.shade200,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.blue,
-                      backgroundImage: AssetImage('assets/budget_icon.png'),
-                    ),
-                  ),
                   SizedBox(width: 5.0),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(budgets[index],
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold)),
-                      Text('Know your expenses',
-                          style: TextStyle(color: Colors.grey)),
+                      Row(
+                        children: [
+                          Container(
+                            // width: 1.0,
+                            // height: 40.0,
+                            // color: Colors.purple/[300],
+                            child: CircleAvatar(
+                              backgroundColor: Colors.purple[200],
+                              foregroundColor: Colors.purple[200],
+                              backgroundImage:
+                                  AssetImage('images/budget_icon.png'),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.fromLTRB(10, 10, 50, 10),
+                            width: 200,
+                            child: Text(budgets[index],
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20.0,
+                                    letterSpacing: 1.0,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          Container(
+                            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                            child: Text(
+                                '\$${current_expense[index].toString()} / \$${total_expense[index].toString()}',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20.0,
+                                    letterSpacing: 1.0,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.fromLTRB(10, 10, 50, 10),
+                            width: 300,
+                            child: Text('Know Your Expenses',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          Container(
+                            width: 40.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                            ),
+                            child: FloatingActionButton(
+                              heroTag: 'expense',
+                              onPressed: () {},
+                              child: Icon(Icons.arrow_forward),
+                            ),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.fromLTRB(10, 20, 0, 10),
+                            width: 400,
+                            child: Text(
+                                'Validity from ${creationTime[index].day}.${creationTime[index].month}.${creationTime[index].year} to ${endTime[index].day}.${endTime[index].month}.${endTime[index].year}',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.fromLTRB(10, 20, 0, 10),
+                            width: 300,
+                            child: Text("Budget's User",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          Container(
+                            width: 40.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                            ),
+                            child: FloatingActionButton(
+                              heroTag: 'users',
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Users Using this Budget'),
+                                        content: Container(
+                                          width: double.minPositive,
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount: membersId[index].length,
+                                            itemBuilder:
+                                                (BuildContext context, int i) {
+                                              return ListTile(
+                                                title:
+                                                    Text(membersId[index][i]),
+                                                onTap: () {
+                                                  Navigator.pop(context,
+                                                      membersId[index][i]);
+                                                },
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    });
+                              },
+                              backgroundColor:
+                                  Color.fromARGB(255, 120, 199, 212),
+                              child: Icon(Icons.info_outline),
+                            ),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.fromLTRB(10, 20, 0, 10),
+                            width: 300,
+                            child: Text("Budget's Supervisor",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          Container(
+                            width: 40.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                            ),
+                            child: FloatingActionButton(
+                              heroTag: 'supervisors',
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('List of supervisor'),
+                                        content: Container(
+                                          width: double.minPositive,
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount:
+                                                supervisorId[index].length,
+                                            itemBuilder:
+                                                (BuildContext context, int i) {
+                                              return ListTile(
+                                                title: Text(
+                                                    supervisorId[index][i]),
+                                                onTap: () {
+                                                  Navigator.pop(context,
+                                                      supervisorId[index][i]);
+                                                },
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    });
+                              },
+                              backgroundColor: Color.fromARGB(255, 33, 91, 100),
+                              child: Icon(Icons.list),
+                            ),
+                          )
+                        ],
+                      ),
                     ],
                   ),
                 ],
-              ),
-              Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => ExpensesPage()));
-                  },
-                  backgroundColor: Color.fromARGB(255, 154, 202, 239),
-                  child: Icon(Icons.arrow_forward),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-ListView _buildListViewSupervisor(List<String> myList) {
-  return ListView.builder(
-    itemCount: num_item_to_be_displayed,
-    shrinkWrap: true,
-    itemBuilder: (BuildContext context, int index) => Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-      child: Card(
-        elevation: 5.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0.0),
-        ),
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    width: 55.0,
-                    height: 55.0,
-                    // color: Colors.blue.shade200,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.blue,
-                      //backgroundImage: Image.asset('assets/body.jpeg')),
-
-                      backgroundImage: AssetImage('assets/supervisor.png'),
-                    ),
-                  ),
-                  SizedBox(width: 2.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(myList[index],
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold)),
-                      Text('Know your expenses',
-                          style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                child: FloatingActionButton(
-                  onPressed: () {},
-                  backgroundColor: Color.fromARGB(255, 154, 202, 239),
-                  child: Icon(Icons.arrow_forward),
-                ),
               ),
             ],
           ),
