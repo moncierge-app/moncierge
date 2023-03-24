@@ -58,7 +58,7 @@ Describes the high level design
 ![notifications](./images/notification_workflow.jpeg)
 
 <a id="snippets"></a>
-## 💡 Snippets
+### 💡 Snippets
 Some working snippets of the project (UI or API or command line)
 
 <a id="future-scope"></a>
