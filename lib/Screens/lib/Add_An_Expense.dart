@@ -2,6 +2,8 @@ import 'package:first_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:email_validator/email_validator.dart';
+import 'package:first_app/Expenses.dart';
+
 
 class AddAnExpensePage extends StatefulWidget {
   @override
@@ -179,8 +181,13 @@ class MyCustomFormState extends State<MyCustomForm> {
                     // If the form is valid, display a Snackbar.
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Data is in processing.')));
-                  } else {
                     _expenseAdditionDate = DateTime.now();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ExpensesPage()),
+                    );
+                  } else {
+
                   }
                 },
               )),
