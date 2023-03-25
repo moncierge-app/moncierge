@@ -12,6 +12,23 @@ class PasswordFieldValidator {
   }
 }
 
+class FirstNameFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'First Name can\'t be empty' : null;
+  }
+}
+class LastNameFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Last Name  can\'t be empty' : null;
+  }
+}
+
+class MobileNumberFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Mobile Number  can\'t be empty' : null;
+  }
+}
+
 class SignUpPage extends StatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
@@ -48,34 +65,19 @@ class _SignUpPageState extends State<SignUpPage> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'First Name'),
                 obscureText: true,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your First Name';
-                  }
-                  return null;
-                },
+                validator: FirstNameFieldValidator.validate,
                 onSaved: (value) => _firstName = value!,
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Last Name'),
                 obscureText: true,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your Last Name';
-                  }
-                  return null;
-                },
+                validator: LastNameFieldValidator.validate,
                 onSaved: (value) => _lastName = value!,
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Mobile No'),
                 obscureText: true,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your Mobile Number';
-                  }
-                  return null;
-                },
+                validator:MobileNumberFieldValidator.validate,
                 onSaved: (value) => _mobile = value!,
               ),
               Padding(
