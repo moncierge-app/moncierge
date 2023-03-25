@@ -2,16 +2,29 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class User {
   // Creating Field inside the class
-
   var currentUser;
-
-  late String email = "sample@gmail.com";
-  late String password = "sample";
+  late String email;
+  late String password;
   late String name;
   late String phoneNumber;
-  late List<String>
-      supervisorOfBudgets; //list of budget IDs pointing to budgets that the user supervises
-  late List<String> budgetIDs; // list of budgets that the user is a member of
+  List<String> supervisorOfBudgets =
+      []; //list of budget IDs pointing to budgets that the user supervises
+  List<String> budgetIDs = []; // list of budgets that the user is a member of
+
+  User(
+      {required this.name,
+      required this.email,
+      required this.phoneNumber,
+      required this.password});
+
+  User.emailPassword({required this.email, required this.password});
+
+  User.withBudgetLists(
+      {required this.name,
+      required this.email,
+      required this.phoneNumber,
+      required this.supervisorOfBudgets,
+      required this.budgetIDs});
 
   // Setters
   set changeUserEmail(String email) {
@@ -43,7 +56,12 @@ class User {
   String get userEmail {
     return email;
   }
-  
+
+  // TODO: Unneccessary function?
+  String get userPassword {
+    return password;
+  }
+
   String get userName {
     return name;
   }
@@ -81,11 +99,11 @@ class User {
   //SIGN IN METHOD
   Future<bool> signIn({required String email, required String password}) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      var e = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
       currentUser = email;
       return true;
     } on FirebaseAuthException catch (e) {
-      //return e.message.toString();
       return false;
     }
   }
@@ -94,12 +112,5 @@ class User {
   Future signOut() async {
     await _auth.signOut();
     currentUser = null;
-    print('signed out');
   }
-}
-
-void main() {
-  User s1 = User();
-  s1.email = 'kavyabhat@gmail.com';
-  print(s1.email);
 }

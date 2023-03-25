@@ -1,245 +1,131 @@
-import 'package:first_app/main.dart';
-import 'package:first_app/Screens/lib/Add_An_Expense.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter/main.dart';
-import 'package:intl/intl.dart';
+import 'package:moncierge/General/budget.dart';
+import 'package:moncierge/General/expense.dart';
+import 'package:moncierge/General/user.dart';
+import 'package:moncierge/Screens/lib/add_an_expense.dart';
+import 'package:moncierge/Utilities/budget_utils.dart';
 import 'package:pie_chart/pie_chart.dart';
 
-
 class ExpensesPage extends StatefulWidget {
+  User user;
+  String budgetID;
+  ExpensesPage({required this.user, required this.budgetID});
+
   @override
   _ExpensesPageState createState() => _ExpensesPageState();
 }
 
-// Replace this List with the list fetched from the database
-// To Be Replaced
-String payment_Date = DateFormat('dd/MM/yyyy').format(DateTime.now());
-List<Map<String, dynamic>> products = [
-  {
-    'Date of Payment': "16/03/23",
-    'Paid To': 'Product 1',
-    'Category': 'flight ticket',
-    'Payment Mode': "UPI",
-    'Amount Spent': 40.00
-  },
-  {
-    'Date of Payment': "16/03/23",
-    'Paid To': 'Product 1',
-    'Category': 'food',
-    'Payment Mode': "UPI",
-    'Amount Spent': 40.00
-  },
-  {
-    'Date of Payment': "16/03/23",
-    'Paid To': 'Product 1',
-    'Category': 'travel',
-    'Payment Mode': "UPI",
-    'Amount Spent': 10.00
-  },
-  {
-    'Date of Payment': "16/03/23",
-    'Paid To': 'Product 1',
-    'Category': 'miscellaneous',
-    'Payment Mode': "UPI",
-    'Amount Spent': 30.00
-  },
-];
-
-
-
-Map<String, double> GetMap(List<Map<String, dynamic>> products )
-{
-  Map<String, double> datamap = products.fold({}, (Map<String, double> acc, product) {
-    String category = product['Category'];
-    double amount = product['Amount Spent'];
+Map<String, double> getMap(List<Expenses> expenses) {
+  Map<String, double> datamap =
+      expenses.fold({}, (Map<String, double> acc, product) {
+    String category = product.category;
+    double amount = product.amount.toDouble();
     acc.update(category, (value) => value + amount, ifAbsent: () => amount);
     return acc;
   });
 
-
   return datamap;
 }
 
-
-// To Be Replaced
-DateTime date_Of_Expiry = DateTime.now();
-
-String formatted_Date_Of_Expiry =
-DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
-
-// To Be Replaced
-DateTime date_Of_Creation = DateTime.now();
-
-String formatted_Date_Of_Creation =
-    DateFormat('dd/MM/yyyy').format(date_Of_Expiry);
-
 class _ExpensesPageState extends State<ExpensesPage> {
-  final TextEditingController _textEditingController = TextEditingController();
-  int _selectedIndex = -1;
-
-  // To Be Replaced
-  final threshold_Amount = 65;
-  // To Be Replaced
-  final expense_Max_Limit = 100;
-  // To Be Replaced
-  final current_Expense = 25;
-
-  final _scrollController = ScrollController();
-
-  void _showEditDialog(int index) {
-    setState(() {
-      _selectedIndex = index;
-      _textEditingController.text = products[index]['Amount Spent'].toString();
-    });
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Edit Amount Spent'),
-          content: TextFormField(
-            controller: _textEditingController,
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value!.isEmpty) {
-                return 'Please enter a value';
-              }
-              return null;
-            },
-            decoration: InputDecoration(
-              hintText: 'Amount Spent',
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('CANCEL'),
-              onPressed: () {
-                setState(() {
-                  _selectedIndex = -1;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('SAVE'),
-              onPressed: () {
-                if (_textEditingController.text.isNotEmpty &&
-                    double.tryParse(_textEditingController.text) != null) {
-                  setState(() {
-                    products[index]['Amount Spent'] =
-                        double.parse(_textEditingController.text);
-                    _selectedIndex = -1;
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
+  late Budget budget;
+  List<Expenses> expenses = [];
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
           appBar: AppBar(
-            title: Text('Transaction Details'),
+            title: const Text('Transaction Details'),
           ),
           body: SingleChildScrollView(
-            child: Column(children: <Widget>[
-              SizedBox(height: 20),
-              Container(
-                height: 40,
-                width: 250,
-                decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(10)),
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => AddAnExpensePage()));
-                  },
-                  icon: SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: Icon(Icons.add, color: Colors.black),
-                  ),
-                  label: Text(
-                    'Add an Expense',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text("Maximum Expense Limit: "),
-                          Expanded(
-                            child: Text("$expense_Max_Limit"),
-                          ),
-                        ],
+            child: FutureBuilder(
+                future: getBudgetandExpenses(),
+                builder: (context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData == false) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  return Column(children: <Widget>[
+                    const SizedBox(height: 20),
+                    Container(
+                      height: 40,
+                      width: 250,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => AddAnExpensePage(
+                                      user: widget.user, budget: budget)));
+                        },
+                        icon: const SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: Icon(Icons.add, color: Colors.black),
+                        ),
+                        label: const Text(
+                          'Add an Expense',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
                       ),
-                      SizedBox(height: 10), // add space between rows
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Text("Maximum Expense Limit: "),
+                                Expanded(
+                                  child: Text("${budget.totalAmount}"),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                                height:
+                                    10), // add space between rows// add space between rows
 
-                      Row(
-                        children: [
-                          Text("Threshold Amount: "),
-                          Expanded(
-                            child: Text("$threshold_Amount"),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10), // add space between rows
+                            Row(
+                              children: [
+                                const Text("Date of Expiry: "),
+                                Expanded(
+                                  child: Text(
+                                      "${budget.endTime.day} / ${budget.endTime.month} / ${budget.endTime.year}"),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                                height: 10), // add space between rows
 
-                      Row(
-                        children: [
-                          Text("Date of Expiry : "),
-                          Expanded(
-                            child: Text("$formatted_Date_Of_Expiry."),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10), // add space between rows
-
-                      Row(
-                        children: [
-                          Text("Date of Creation : "),
-                          Expanded(
-                            child: Text("$formatted_Date_Of_Creation"),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 10), // add space between rows
-
-                      Row(
-                        children: [
-                          Text("Amount Spent : "),
-                          Expanded(
-                            child: Text("$current_Expense"),
-                          ),
-                        ],
-                      ),
-                    ],
-                  )),
-              SizedBox(height: 10),
-              Container(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    controller: _scrollController,
-                    child: FittedBox(
+                            Row(
+                              children: [
+                                const Text("Date of Creation: "),
+                                Expanded(
+                                  child: Text(
+                                      "${budget.creationTime.day} / ${budget.creationTime.month} / ${budget.creationTime.year}"),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                const Text("Amount Spent: "),
+                                Expanded(
+                                  child: Text("${budget.amountUsed}"),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )),
+                    const SizedBox(height: 10),
+                    FittedBox(
                       child: DataTable(
                         columnSpacing: 10,
-                        columns: [
+                        columns: const [
                           DataColumn(
                             label: Text(
                               'Paid On',
@@ -248,102 +134,74 @@ class _ExpensesPageState extends State<ExpensesPage> {
                               maxLines: 3,
                             ),
                           ),
+                          DataColumn(label: Text('Spent By')),
                           DataColumn(label: Text('Paid to')),
                           DataColumn(label: Text('Category')),
                           DataColumn(label: Text('Amount')),
                           DataColumn(label: Text('Mode')),
+                          DataColumn(label: Text('Decription'))
                         ],
                         rows: List<DataRow>.generate(
-                          products.length,
+                          expenses.length,
                           (index) => DataRow(
                             cells: [
-                              DataCell(Text(products[index]['Date of Payment']
-                                  .toString())),
-                              DataCell(Text(products[index]['Paid To'])),
-                              DataCell(
-                                  Text(products[index]['Category'].toString())),
-                              DataCell(
-                                GestureDetector(
-                                  child: Row(
-                                    children: [
-                                      Text(products[index]['Amount Spent']
-                                          .toString()),
-                                      Icon(Icons.edit),
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    _showEditDialog(index);
-                                  },
-                                ),
-                              ),
+                              DataCell(Text('${expenses[index].getUserId}')),
                               DataCell(Text(
-                                  products[index]['Payment Mode'].toString())),
+                                  '${expenses[index].timeOfPayment.day}/${expenses[index].timeOfPayment.month}/${expenses[index].timeOfPayment.year}')),
+                              DataCell(Text(expenses[index].receiver)),
+                              DataCell(Text(expenses[index].category)),
+                              DataCell(
+                                Text(expenses[index].amount.toString()),
+                              ),
+                              DataCell(
+                                  Text(expenses[index].paymentMode.toString())),
+                              DataCell(Text(expenses[index].description))
                             ],
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                child: Column(
-                  children: [
-                    PieChart(
-                      dataMap: GetMap(products),
-                      chartRadius: MediaQuery.of(context).size.width / 2.7,
-                      legendOptions: LegendOptions(
-                        legendTextStyle: TextStyle(fontSize: 16),
-                        showLegendsInRow: false,
-                        legendPosition: LegendPosition.right,
-                      ),
-                      chartValuesOptions: ChartValuesOptions(
-                        showChartValueBackground: true,
-                        showChartValues: true,
-                        showChartValuesInPercentage: true,
-                        showChartValuesOutside: true,
-                        decimalPlaces: 1,
-                      ),
-                    ),
-
-                  ],
-                ),
-
-
-              ),
-
-            ]),
+                    const SizedBox(height: 10),
+                    (expenses.length > 0)
+                        ? Column(
+                            children: [
+                              const Text('Categorywise split',
+                                  style: TextStyle(fontSize: 18)),
+                              PieChart(
+                                dataMap: getMap(expenses),
+                                chartRadius:
+                                    MediaQuery.of(context).size.width / 2.7,
+                                legendOptions: const LegendOptions(
+                                  legendTextStyle: TextStyle(fontSize: 16),
+                                  showLegendsInRow: false,
+                                  legendPosition: LegendPosition.right,
+                                ),
+                                chartValuesOptions: const ChartValuesOptions(
+                                  showChartValueBackground: true,
+                                  showChartValues: true,
+                                  showChartValuesInPercentage: true,
+                                  showChartValuesOutside: true,
+                                  decimalPlaces: 1,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text('---'),
+                  ]);
+                }),
             //child:
           )),
     );
   }
+
+  Future<List<Expenses>> getBudgetandExpenses() async {
+    String budgetID = widget.budgetID;
+    budget = await BudgetUtils.getBudget(budgetID);
+    expenses = [];
+    for (var expenseID in budget.expenses) {
+      Expenses expense = await BudgetUtils.getExpense(budgetID, expenseID);
+      expenses.add(expense);
+    }
+    return expenses;
+  }
 }
-
-
-// STATIC Table code :
-
-// return Scaffold(
-// appBar: AppBar(
-// title: Text('Home Page'),
-// ),
-// body: Center(
-// child: Container(
-// height: 80,
-// width: 150,
-// decoration: BoxDecoration(
-// color: Colors.blue, borderRadius: BorderRadius.circular(10)),
-// child: TextButton(
-// onPressed: () {
-// Navigator.pop(context);
-// },
-// child: Text(
-// 'Welcome',
-// style: TextStyle(color: Colors.white, fontSize: 25),
-// ),
-// ),
-// ),
-// ),
-// );
-// DETAILS OF BUDGET + EXPENSES
-//

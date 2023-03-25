@@ -1,10 +1,13 @@
 // Utility class to manage all the database access operations
 // ignore: depend_on_referenced_packages
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:moncierge/General/budget.dart';
+import 'package:moncierge/General/expense.dart';
+import 'package:moncierge/Utilities/notification_utils.dart';
 
 class BudgetUtils {
   // To check if a user with given userID exists or not
-  Future<bool> checkIfUserExists(String userID) async {
+  static Future<bool> checkIfUserExists(String userID) async {
     final userDocument =
         await FirebaseFirestore.instance.collection('User').doc(userID).get();
     if (userDocument.exists) {
@@ -15,26 +18,28 @@ class BudgetUtils {
   }
 
   //Check if expense adding time is in the valid budget interval
-  Future<bool> checkExpenseValid(
+  static Future<bool> checkExpenseValid(
       String budgetID, DateTime timestampAdded) async {
     final budgetDocument = await FirebaseFirestore.instance
         .collection('Budget')
         .doc(budgetID)
         .get();
-    if (timestampAdded.compareTo(budgetDocument['creationTime']) >= 0 &&
-        timestampAdded.compareTo(budgetDocument['endTime']) <= 0) return true;
+    if (timestampAdded.compareTo(budgetDocument['creationTime'].toDate()) >=
+            0 &&
+        timestampAdded.compareTo(budgetDocument['endTime'].toDate()) <= 0)
+      return true;
     return false;
   }
 
   // To create a budget with given inputs
-  Future<bool> createBudget(
+  static Future<bool> createBudget(
       String budgetName,
       DateTime creationTime,
       String creatorEmailID,
       DateTime endTime,
       List<String> supervisorIDs,
       List<String> memberIDs,
-      List<dynamic> categories,
+      List<Category> categories,
       int totalAmount) async {
     try {
       String creationTimeString = creationTime.toString();
@@ -78,10 +83,10 @@ class BudgetUtils {
         await budgetCollection
             .doc(budgetID)
             .collection('Categories')
-            .doc(categories[i]['categoryName'])
+            .doc(categories[i].category)
             .set({
-          'warningAmount': categories[i]['warningAmount'],
-          'amount': categories[i]['amount'],
+          'warningAmount': categories[i].warningAmount,
+          'amount': categories[i].totalAmount,
           'amountUsed': 0
         });
       }
@@ -113,7 +118,7 @@ class BudgetUtils {
   }
 
   // To create an expense with given inputs and add to budget
-  Future<bool> addExpense(
+  static Future<bool> addExpense(
       String creatorID,
       String budgetID,
       int amount,
@@ -124,7 +129,7 @@ class BudgetUtils {
       DateTime timestampAdded,
       DateTime timestampPaymentMade) async {
     try {
-      if (await checkExpenseValid(budgetID, timestampAdded)) {
+      if (await checkExpenseValid(budgetID, timestampPaymentMade)) {
         var expenseCollection =
             FirebaseFirestore.instance.collection('Expense');
 
@@ -176,9 +181,16 @@ class BudgetUtils {
             .update({'amountUsed': categoryDocument['amountUsed'] + amount});
 
         //if limit exceeded
-        Future<String> msg = checkLimitExceeded(budgetID, expenseID);
+        String msg = await checkLimitExceeded(budgetID, expenseID);
         if (msg != '') {
-          // TODO: Notify the corresponding users about exceeded limit
+          Set<String> receiverList = Set<String>();
+          var members =
+              await budgetCollection.doc(budgetID).collection('Members').get();
+          for (var member in members.docs) receiverList.add(member.id);
+          List<String> receivers = [];
+          for (var reciever in receiverList) receivers.add(receiver);
+          NotificationUtils.sendEmailNotification(receivers, msg,
+              '${creatorID} added and expense of ${amount} and the budget limit of ${budgetDocument['budgetName']} exceeded. For more details please check the Moncierge application.');
         }
         return true;
       } else {
@@ -190,7 +202,8 @@ class BudgetUtils {
   }
 
   // Check if on adding a particular expense, any budget limit is exceeded, returns the excceded message corresponding to limit
-  Future<String> checkLimitExceeded(String budgetID, String expenseID) async {
+  static Future<String> checkLimitExceeded(
+      String budgetID, String expenseID) async {
     var budgetDocument = await FirebaseFirestore.instance
         .collection('Budget')
         .doc(budgetID)
@@ -221,38 +234,103 @@ class BudgetUtils {
     return '';
   }
 
+  static Future<Budget> getBudget(String budgetID) async {
+    Budget budget;
+    var budgetDocument = await FirebaseFirestore.instance
+        .collection('Budget')
+        .doc(budgetID)
+        .get();
+    var members = await FirebaseFirestore.instance
+        .collection('Budget')
+        .doc(budgetID)
+        .collection('Members')
+        .get();
+    List<String> memberIds = members.docs.map((member) => member.id).toList();
+    var supervisors = await FirebaseFirestore.instance
+        .collection('Budget')
+        .doc(budgetID)
+        .collection('Supervisors')
+        .get();
+    List<String> supervisorIds =
+        supervisors.docs.map((supervisor) => supervisor.id).toList();
+    var expenses = await FirebaseFirestore.instance
+        .collection('Budget')
+        .doc(budgetID)
+        .collection('Expenses')
+        .get();
+    List<String> expenseIds =
+        expenses.docs.map((expense) => expense.id).toList();
+    var categoriesDoc = await FirebaseFirestore.instance
+        .collection('Budget')
+        .doc(budgetID)
+        .collection('Categories')
+        .get();
+    List<Category> categories = categoriesDoc.docs
+        .map((category) => Category(
+            category: category.id,
+            warningAmount: category['warningAmount'],
+            totalAmount: category['amount'],
+            amountUsed: category['amountUsed']))
+        .toList();
+    budget = Budget(
+      budgetDocument.id,
+      budgetDocument['budgetName'],
+      budgetDocument['creationTime'].toDate(),
+      budgetDocument['endTime'].toDate(),
+      memberIds,
+      supervisorIds,
+      expenseIds,
+      categories,
+      budgetDocument['totalAmount'],
+      budgetDocument['amountUsed'],
+    );
+    return budget;
+  }
+
+  static Future<Expenses> getExpense(String budgetID, String expenseID) async {
+    var expenseInfo = await FirebaseFirestore.instance
+        .collection('Expense')
+        .doc(expenseID)
+        .get();
+    Expenses expense = Expenses(
+        userId: expenseInfo['userID'],
+        budgetId: expenseInfo['budgetID'],
+        amount: expenseInfo['amount'],
+        category: expenseInfo['category'],
+        paymentMode: expenseInfo['paymentMode'],
+        description: expenseInfo['description'],
+        receiver: expenseInfo['receiver'],
+        timeOfExpenseAddition: expenseInfo['timestampAdded'].toDate(),
+        timeOfPayment: expenseInfo['timestampPaymentMade'].toDate());
+    return expense;
+  }
+
   // Fetch all the budget info a user is member of and return as a list of objects
-  Future<List> getBudgetsForUser(String userID) async {
-    List budgets = [];
+  static Future<List<Budget>> getBudgetsForUser(String userID) async {
+    List<Budget> budgets = [];
     var budgetIDs = await FirebaseFirestore.instance
         .collection('User')
         .doc(userID)
         .collection('MemberOf')
         .get();
     for (var budgetID in budgetIDs.docs) {
-      var budgetDocument = await FirebaseFirestore.instance
-          .collection('Budget')
-          .doc(budgetID.id)
-          .get();
-      budgets.add({budgetDocument});
+      var budget = await getBudget(budgetID.id);
+      budgets.add(budget);
     }
     return budgets;
   }
 
   // Fetch all the budget info a user is supervisor of and return as a list of objects
-  Future<List> getBudgetsForSupervisor(String userID) async {
-    List budgets = [];
+  static Future<List<Budget>> getBudgetsForSupervisor(String userID) async {
+    List<Budget> budgets = [];
     var budgetIDs = await FirebaseFirestore.instance
         .collection('User')
         .doc(userID)
         .collection('SupervisorOf')
         .get();
     for (var budgetID in budgetIDs.docs) {
-      var budgetDocument = await FirebaseFirestore.instance
-          .collection('Budget')
-          .doc(budgetID.id)
-          .get();
-      budgets.add({budgetDocument});
+      var budget = await getBudget(budgetID.id);
+      budgets.add(budget);
     }
     return budgets;
   }
@@ -273,5 +351,18 @@ class BudgetUtils {
       expenses.add({expenseDocument});
     }
     return expenses;
+  }
+
+  static Future<List<String>> getCategoriesForBudget(String budgetID) async {
+    List<String> categories = [];
+    var categoriesInfo = await FirebaseFirestore.instance
+        .collection('Budget')
+        .doc(budgetID)
+        .collection('Categories')
+        .get();
+    for (var category in categoriesInfo.docs) {
+      categories.add(category.id);
+    }
+    return categories;
   }
 }

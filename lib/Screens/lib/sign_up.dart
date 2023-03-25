@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:first_app/General/User.dart';
-import 'package:first_app/Screens/lib/BudgetPage.dart';
-import 'package:first_app/Utilities/user_utils.dart';
+import 'package:moncierge/General/user.dart';
+import 'package:moncierge/Screens/lib/budgets_list.dart';
+import 'package:moncierge/Utilities/user_utils.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -57,7 +57,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 },
                 onSaved: (value) => _firstName = value!,
               ),
-
               TextFormField(
                 decoration: InputDecoration(labelText: 'Mobile No'),
                 obscureText: false,
@@ -76,24 +75,23 @@ class _SignUpPageState extends State<SignUpPage> {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
 
-                      User new_user = User();
-                      new_user.email = _email.toString();
-                      new_user.password = _password.toString();
+                      User newUser = User(
+                          name: _firstName!,
+                          phoneNumber: _mobile!,
+                          email: _email!,
+                          password: _password!);
 
                       //Firebase authentication
-                      new_user.signUp(
-                          email: new_user.email, password: new_user.password);
+                      newUser.signUp(
+                          email: newUser.email, password: newUser.password);
 
                       //Add new user to database
-                      UserUtils.addNewUser(
-                          new_user.email,
-                          new_user.password,
-                          new_user.name,
-                          new_user.phoneNumber);
+                      UserUtils.addNewUser(newUser.email, newUser.password,
+                          newUser.name, newUser.phoneNumber);
 
                       //Load budgets of the user
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => BudgetPage()));
+                          MaterialPageRoute(builder: (_) => BudgetPage(user: newUser)));
                     }
                   },
                   child: Text('Sign Up'),

@@ -1,41 +1,30 @@
-enum PaymentModes {
-  wallet,
-  creditCard,
-  debitCard,
-  atmCard,
-  netBanking,
-  cashOnDelivery,
-  giftCard,
-  upi
-}
-
 class Expenses {
   String expenseId = "000000"; //
   String userId = "0000000"; // TO BE QUERIED FROM THE DATABASE
   String budgetId = "0000000";
   DateTime timeOfExpenseAddition; // captured by the app at time of addition
   DateTime timeOfPayment; // Is the user going to enter this field?
-  double amount = 0.0;
+  int amount = 0;
   // can it be a list? [ does the user need to enter separate category for each expense or he can add multiple categories combined for 2-3 expense at a time?]
-  List<String> categories; // categories where expense was done
-  PaymentModes paymentMode;
-  // UNCOMMENT LATER ON
-  //  late User receiver;
+  String category; // categories where expense was done
+  String paymentMode;
+  late String receiver;
+  String description;
 
   // setters provided by the user
 
   // user will enter the amount spent
-  set changeAmount(double amount) {
+  set changeAmount(int amount) {
     this.amount = amount;
   }
 
   // user will enter the category where amount was spent
   set addCategoryForExpense(String category) {
-    categories.add(category);
+    this.category = category;
   }
 
   // user will enter the mode of payment
-  set setPaymentMode(PaymentModes paymentMode) {
+  set setPaymentMode(String paymentMode) {
     this.paymentMode = paymentMode;
   }
 
@@ -56,16 +45,16 @@ class Expenses {
     return budgetId;
   }
 
-  double get getAmountSpent {
+  int get getAmountSpent {
     return amount;
   }
 
-  PaymentModes get getPaymentMode {
+  String get getPaymentMode {
     return paymentMode;
   }
 
-  List<String> get getCategories {
-    return categories;
+  String get getCategory {
+    return category;
   }
 
   DateTime get getDateAndTimeOfPayment {
@@ -75,30 +64,26 @@ class Expenses {
   DateTime get getDateAndTimeOfExpenseAddition {
     return timeOfExpenseAddition;
   }
-  // User get getReceiver
-  // {
-  //   return receiver;
-  // }
 
-  void updateExpenses(Expenses expense, double amount) {
+  String get getReceiver {
+    return receiver;
+  }
+
+  void updateExpenses(Expenses expense, int amount) {
     expense.amount = amount;
   }
 
   Expenses(
       {required this.userId,
       required this.budgetId,
-      required this.expenseId,
       required this.amount,
-      required this.categories,
+      required this.category,
       required this.paymentMode,
+      required this.description,
       required this.timeOfExpenseAddition,
-      required this.timeOfPayment
-      // required this.receiver
-      });
+      required this.timeOfPayment,
+      required this.receiver});
 }
-
-void main() {}
-
 
 /**
  *

@@ -1,25 +1,14 @@
-import 'package:flutter/foundation.dart';
-
-import 'BudgetPage.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:moncierge/General/budget.dart';
+import 'package:moncierge/General/user.dart';
+import 'package:moncierge/Utilities/budget_utils.dart';
 
-class AddSupervisorBudget extends StatefulWidget {
-  // const AddSupervisorBudget({Key? key}) ;
-  const AddSupervisorBudget({Key? key}) : super(key: key);
+class AddBudget extends StatefulWidget {
+  User user;
+  AddBudget({required this.user});
   @override
-  State<AddSupervisorBudget> createState() => _AddSupervisorBudget();
-}
-
-void _showDatePicker(context) {
-  showDatePicker(
-    context: context,
-    initialDate: DateTime.now(),
-    firstDate: DateTime.now(),
-    lastDate: DateTime(2025),
-  );
+  State<AddBudget> createState() => _AddBudget();
 }
 
 bool validateEmail(String value) {
@@ -29,13 +18,20 @@ bool validateEmail(String value) {
   return (!regex.hasMatch(value)) ? false : true;
 }
 
-class _AddSupervisorBudget extends State<AddSupervisorBudget> {
-  @override
+class _AddBudget extends State<AddBudget> {
   final formKey = GlobalKey<FormState>();
-  String? categories;
+  String budgetName = '';
+  int totalAmount = 0;
   DateTime creationTime = DateTime.now();
   late DateTime endTime;
-  final TextEditingController _dateController = TextEditingController();
+  List<Category> categories = [];
+  List<String> members = [];
+  List<String> supervisors = [];
+
+  final TextEditingController endDateController = TextEditingController();
+  TextEditingController budgetNameController = TextEditingController();
+  TextEditingController totalAmountController = TextEditingController();
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
@@ -43,7 +39,7 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
         children: [
           Container(
             height: 150,
-            padding: EdgeInsets.fromLTRB(20, 60, 10, 10),
+            padding: const EdgeInsets.fromLTRB(20, 60, 10, 10),
             width: MediaQuery.of(context).size.width,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -55,7 +51,7 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
                   bottomLeft: Radius.circular(60),
                   bottomRight: Radius.circular(60)),
             ),
-            child: Text("Create Budget",
+            child: const Text("Create Budget",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.white,
@@ -64,7 +60,7 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
                     fontWeight: FontWeight.bold)),
           ),
           Container(
-              margin: EdgeInsets.fromLTRB(10, 50, 10, 10),
+              margin: const EdgeInsets.fromLTRB(10, 50, 10, 10),
               width: MediaQuery.of(context).size.width - 50,
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -75,9 +71,10 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextFormField(
-                      decoration: InputDecoration(
+                      controller: budgetNameController,
+                      decoration: const InputDecoration(
                           labelText: "Enter Budget's name",
-                          icon: const Icon(Icons.arrow_forward)),
+                          icon: Icon(Icons.arrow_forward)),
                       validator: (value) {
                         if (value!.isEmpty ||
                             RegExp(r'^[a-z A-Z 0-9]').hasMatch(value)) {
@@ -88,10 +85,9 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
                       },
                     ),
                     TextFormField(
+                      controller: totalAmountController,
                       decoration: const InputDecoration(
-                        // icon: const Icon(Icons.calendar_today),
-                        // hintText: 'Enter Total Expense',
-                        icon: const Icon(Icons.currency_rupee),
+                        icon: Icon(Icons.currency_rupee),
                         labelText: 'Total Amount',
                       ),
                       validator: (value) {
@@ -104,64 +100,40 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
                       },
                     ),
                     TextFormField(
-                      controller: _dateController,
+                      controller: endDateController,
                       decoration: InputDecoration(
                         hintText: 'End time',
-                        labelText: 'Date of Payment',
+                        labelText: 'Last Valid Date of Budget',
                         prefixIcon: IconButton(
                           icon: const Icon(Icons.calendar_today),
                           onPressed: () => _selectDate(context),
                         ),
                       ),
                       readOnly: true,
-                      validator: (_selectedDate) {
-                        if (_selectedDate!.isEmpty) {
+                      validator: (selectedDate) {
+                        if (selectedDate!.isEmpty) {
                           return 'Please enter valid date';
                         }
                         return null;
                       },
                     ),
-                    DropdownButtonFormField(
-                      decoration: InputDecoration(
-                        icon: const Icon(Icons.category),
-                        hintText: 'Select a category',
-                        labelText: 'Category',
-                      ),
-                      value: categories,
-                      items: [
-                        DropdownMenuItem(
-                          value: 'Food',
-                          child: Text('Food'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Travel',
-                          child: Text('Travel'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Personal Expense',
-                          child: Text('Personal Expense'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          categories = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'This field cant remain empty.';
-                        }
-
-                        return null;
-                      },
-                    ),
-                    // end date
-                    // add member button
                     TextButton(
                       onPressed: () {
-                        AddMember(context);
+                        addCategory(context);
                       },
-                      child: Text(
+                      child: const Text(
+                        'Add Categories',
+                        style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        addMember(context);
+                      },
+                      child: const Text(
                         'Add new Member',
                         style: TextStyle(
                             color: Colors.blue,
@@ -169,14 +141,14 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
                             fontWeight: FontWeight.bold),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     TextButton(
                       onPressed: () {
-                        AddSupervisor(context);
+                        addSupervisor(context);
                       },
-                      child: Text(
+                      child: const Text(
                         'Add Supervisor',
                         style: TextStyle(
                             color: Colors.blue,
@@ -185,17 +157,58 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
                       ),
                     ),
                     // submit button
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        // add the budget to data base
-                        // budgets.add()
-
-                        submit(context);
+                      onPressed: () async {
+                        if (members.isNotEmpty &&
+                            categories.isNotEmpty &&
+                            budgetNameController.text != '' &&
+                            totalAmountController.text != '' &&
+                            endDateController.text != '') {
+                          totalAmount = int.parse(totalAmountController.text);
+                          budgetName = budgetNameController.text;
+                          Budget budget = Budget(
+                              '${widget.user.email}|$creationTime',
+                              budgetName,
+                              creationTime,
+                              endTime,
+                              members,
+                              supervisors,
+                              [],
+                              categories,
+                              totalAmount,
+                              0);
+                          widget.user.budgetIDs.add(budget.budgetId);
+                          await BudgetUtils.createBudget(
+                              budgetName,
+                              creationTime,
+                              widget.user.email,
+                              endTime,
+                              supervisors,
+                              members,
+                              categories,
+                              totalAmount);
+                          Navigator.of(context).pop();
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => AlertDialog(
+                                          title: const Text('Invalid Input'),
+                                          content: const Text(
+                                              'Please fill all the fields appropriately'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Ok'))
+                                          ])));
+                        }
                       },
-                      child: Text(
+                      child: const Text(
                         'Create',
                         style: TextStyle(
                             color: Colors.white,
@@ -212,58 +225,184 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
     );
   }
 
-  Future AddMember(context) => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Add Supervisor Id"),
-          content: TextFormField(
-            autofocus: true,
-            decoration: InputDecoration(labelText: "Enter Supervisor ID"),
-            validator: (value) {
-              if (value!.isEmpty || !validateEmail(value)) {
-                return "Supervisor is invalid";
-              } else {
-                return null;
-              }
-            },
+  Future addCategory(context) => showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController categoryNameController = TextEditingController();
+        TextEditingController warningAmountController = TextEditingController();
+        TextEditingController totalAmountController = TextEditingController();
+        return AlertDialog(
+          title: const Text("Add Category name"),
+          content: Scaffold(
+            body: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  TextFormField(
+                    controller: categoryNameController,
+                    autofocus: true,
+                    decoration:
+                        const InputDecoration(labelText: "Enter Category name"),
+                  ),
+                  TextFormField(
+                    controller: warningAmountController,
+                    keyboardType: TextInputType.number,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                        labelText: "Enter warning amount"),
+                  ),
+                  TextFormField(
+                    controller: totalAmountController,
+                    keyboardType: TextInputType.number,
+                    autofocus: true,
+                    decoration:
+                        const InputDecoration(labelText: "Enter total amount"),
+                  ),
+                ],
+              ),
+            ),
           ),
           actions: [
             TextButton(
                 onPressed: () {
-                  // membersId.add(value);
-                  // enter memebr id in budget
-                  submit(context);
+                  if (categoryNameController.text == '' ||
+                      warningAmountController.text == '' ||
+                      totalAmountController.text == '') {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => AlertDialog(
+                                    title: const Text('Invalid Input'),
+                                    content: const Text(
+                                        'Please fill all the fields appropriately'),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text('Ok'))
+                                    ])));
+                  } else {
+                    int warningAmount = int.parse(warningAmountController.text),
+                        totalAmount = int.parse(totalAmountController.text);
+                    if (warningAmount > totalAmount) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => AlertDialog(
+                                      title: const Text('Invalid Input'),
+                                      content: const Text(
+                                          'Please fill all the fields appropriately'),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text('Ok'))
+                                      ])));
+                    } else {
+                      categories.add(Category(
+                          category: categoryNameController.text,
+                          warningAmount: warningAmount,
+                          totalAmount: totalAmount,
+                          amountUsed: 0));
+                      Navigator.of(context).pop();
+                    }
+                  }
                 },
-                child: Text('SUBMIT'))
+                child: const Text('SUBMIT'))
           ],
-        ),
-      );
-  Future AddSupervisor(context) => showDialog(
+        );
+      });
+
+  Future addMember(context) {
+    return showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Add Member Id"),
-          content: TextFormField(
-            autofocus: true,
-            decoration: InputDecoration(labelText: "Enter Member ID"),
-            validator: (value) {
-              if (value!.isEmpty || !validateEmail(value)) {
-                return "MemberId is invalid";
-              } else {
-                return null;
-              }
-            },
-          ),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  // membersId.add(value);
-                  // enter memebr id in budget
-                  submit(context);
-                },
-                child: Text('SUBMIT'))
-          ],
-        ),
+        builder: (context) {
+          TextEditingController memberIDController = TextEditingController();
+          return AlertDialog(
+            title: const Text("Add Member Id"),
+            content: TextFormField(
+              controller: memberIDController,
+              autofocus: true,
+              decoration: const InputDecoration(labelText: "Enter Member ID"),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () async {
+                    if (memberIDController.text != '' &&
+                        await BudgetUtils.checkIfUserExists(
+                            memberIDController.text)) {
+                      members.add(memberIDController.text);
+                      Navigator.of(context).pop();
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => AlertDialog(
+                                      title: const Text('Invalid Input'),
+                                      content: const Text(
+                                          'Please fill all the fields appropriately'),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text('Ok'))
+                                      ])));
+                    }
+                  },
+                  child: const Text('SUBMIT'))
+            ],
+          );
+        });
+  }
+
+  Future addSupervisor(context) => showDialog(
+        context: context,
+        builder: (context) {
+          TextEditingController supervisorIDController =
+              TextEditingController();
+          return AlertDialog(
+            title: const Text("Add Supervisor ID"),
+            content: TextFormField(
+              controller: supervisorIDController,
+              autofocus: true,
+              decoration:
+                  const InputDecoration(labelText: "Enter Supervisor ID"),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () async {
+                    if (supervisorIDController.text != '' &&
+                        await BudgetUtils.checkIfUserExists(
+                            supervisorIDController.text)) {
+                      supervisors.add(supervisorIDController.text);
+                      Navigator.of(context).pop();
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => AlertDialog(
+                                      title: const Text('Invalid Input'),
+                                      content: const Text(
+                                          'Please fill all the fields appropriately'),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text('Ok'))
+                                      ])));
+                    }
+                  },
+                  child: const Text('SUBMIT'))
+            ],
+          );
+        },
       );
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -271,23 +410,11 @@ class _AddSupervisorBudget extends State<AddSupervisorBudget> {
       firstDate: DateTime(2015, 8),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != creationTime)
+    if (picked != null && picked != creationTime) {
       setState(() {
-        creationTime = picked;
-        _dateController.text = intl.DateFormat.yMd().format(creationTime!);
+        endTime = picked;
+        endDateController.text = intl.DateFormat.yMd().format(creationTime);
       });
+    }
   }
 }
-
-void submit(context) {
-  Navigator.of(context).pop();
-}
-
-// Future AddMember(context) => showDialog(
-//   context: context, 
-//   builder: (context)=>AlertDialog(
-//     title: Text("Add Member Id"),
-
-//   ),
-// )
-

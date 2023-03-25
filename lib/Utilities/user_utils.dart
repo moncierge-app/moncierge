@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:first_app/General/User.dart';
+import 'package:moncierge/General/user.dart';
 
 final FirebaseFirestore _db = FirebaseFirestore.instance;
 final CollectionReference _userCollection = _db.collection('User');
@@ -10,10 +10,7 @@ final CollectionReference _userCollection = _db.collection('User');
 class UserUtils {
   //add user with given inputs
   static Future<void> addNewUser(
-      String email,
-      String password,
-      String name,
-      String phoneNumber) async {
+      String email, String password, String name, String phoneNumber) async {
     Map<String, dynamic> data = <String, dynamic>{
       "email": email,
       "password": password,
@@ -28,9 +25,7 @@ class UserUtils {
         .catchError((e) => print(e));
   }
 
-  static Future<void> forgotPassword(
-      String email,
-      String password) async {
+  static Future<void> forgotPassword(String email, String password) async {
     Map<String, dynamic> data = <String, dynamic>{
       "email": email,
       "password": password
@@ -93,5 +88,16 @@ class UserUtils {
         .delete()
         .whenComplete(() => print('User item deleted from the database'))
         .catchError((e) => print(e));
+  }
+
+  static Future<User> getUserWithEmail(String emailID) async {
+    var userInstance =
+        await FirebaseFirestore.instance.collection('User').doc(emailID).get();
+      User user = User(
+          name: userInstance['name'],
+          email: userInstance['email'],
+          password: userInstance['password'],
+          phoneNumber: userInstance['phoneNumber']);
+      return user;
   }
 }
