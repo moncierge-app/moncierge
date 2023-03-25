@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 
+class EmailFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Email can\'t be empty' : null;
+  }
+}
+
+class PasswordFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Password can\'t be empty' : null;
+  }
+}
+
 class SignUpPage extends StatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
@@ -24,23 +36,13 @@ class _SignUpPageState extends State<SignUpPage> {
             children: <Widget>[
               TextFormField(
                 decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
+                validator: EmailFieldValidator.validate,
                 onSaved: (value) => _email = value!,
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Password'),
                 obscureText: true,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
+                validator: PasswordFieldValidator.validate,
                 onSaved: (value) => _password = value!,
               ),
               TextFormField(
