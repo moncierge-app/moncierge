@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:first_app/General/User.dart';
+import 'package:moncierge/General/user.dart';
 
 final FirebaseFirestore _db = FirebaseFirestore.instance;
 final CollectionReference _userCollection = _db.collection('User');
@@ -7,13 +7,11 @@ final CollectionReference _userCollection = _db.collection('User');
 //TODO: Add validation for email, password and phoneNumber
 //TODO: Allow optional parameters for addUser() and updateUser()
 
+// Utilities to access and manage User Collection
 class UserUtils {
   //add user with given inputs
   static Future<void> addNewUser(
-      String email,
-      String password,
-      String name,
-      String phoneNumber) async {
+      String email, String password, String name, String phoneNumber) async {
     Map<String, dynamic> data = <String, dynamic>{
       "email": email,
       "password": password,
@@ -28,9 +26,8 @@ class UserUtils {
         .catchError((e) => print(e));
   }
 
-  static Future<void> forgotPassword(
-      String email,
-      String password) async {
+  // Update password
+  static Future<void> forgotPassword(String email, String password) async {
     Map<String, dynamic> data = <String, dynamic>{
       "email": email,
       "password": password
@@ -43,21 +40,22 @@ class UserUtils {
         .catchError((e) => print(e));
   }
 
+  // Add budget that user supervises
   static Future<void> addSupervisor(
-      String email, String supervisorOfBudgets) async {
+      String email, String budgetID) async {
     // add budget being supervised as subcollection
     await _userCollection
         .doc(email)
-        .collection('Supervises')
-        .doc(supervisorOfBudgets)
+        .collection('SupervisorOf')
+        .doc(budgetID)
         .set({});
   }
 
+  // Add budget that user is member of
   static Future<void> addBudgetID(String email, String budgetID) async {
-    // add list of budgets that user is a part of
     await _userCollection
         .doc(email)
-        .collection('Budgets')
+        .collection('MemberOf')
         .doc(budgetID)
         .set({});
   }
@@ -93,5 +91,17 @@ class UserUtils {
         .delete()
         .whenComplete(() => print('User item deleted from the database'))
         .catchError((e) => print(e));
+  }
+
+  // Get user details
+  static Future<User> getUserWithEmail(String emailID) async {
+    var userInstance =
+        await FirebaseFirestore.instance.collection('User').doc(emailID).get();
+    User user = User(
+        name: userInstance['name'],
+        email: userInstance['email'],
+        password: userInstance['password'],
+        phoneNumber: userInstance['phoneNumber']);
+    return user;
   }
 }
