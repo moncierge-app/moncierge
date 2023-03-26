@@ -2,9 +2,9 @@
 //visualization will be done for the total spent as well as  category wise spent
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
+// Generates Pie Chart for categorywise split of expenses in a budget
 class CategoryData {
   String category;
   int amount;
@@ -27,8 +27,8 @@ Future<void> createCategoryWiseList(String budgetID) async {
     CategoryData(
       category: 'Total',
       amount: totalAmount1,
-      barColor:
-          charts.ColorUtil.fromDartColor(Color.fromARGB(255, 101, 245, 142)),
+      barColor: charts.ColorUtil.fromDartColor(
+          const Color.fromARGB(255, 101, 245, 142)),
     ),
   );
 
@@ -36,8 +36,8 @@ Future<void> createCategoryWiseList(String budgetID) async {
     CategoryData(
       category: 'Current Spent',
       amount: currentAmount1,
-      barColor:
-          charts.ColorUtil.fromDartColor(Color.fromARGB(255, 241, 109, 109)),
+      barColor: charts.ColorUtil.fromDartColor(
+          const Color.fromARGB(255, 241, 109, 109)),
     ),
   );
 
@@ -56,8 +56,8 @@ Future<void> createCategoryWiseList(String budgetID) async {
       CategoryData(
         category: categories[i]['categoryName'] + ' Limit',
         amount: categories[i]['amount'],
-        barColor:
-            charts.ColorUtil.fromDartColor(Color.fromARGB(255, 101, 245, 142)),
+        barColor: charts.ColorUtil.fromDartColor(
+            const Color.fromARGB(255, 101, 245, 142)),
       ),
     );
 
@@ -65,41 +65,42 @@ Future<void> createCategoryWiseList(String budgetID) async {
       CategoryData(
         category: categories[i]['categoryName'] + ' Used',
         amount: categories[i]['amountUsed'],
-        barColor:
-            charts.ColorUtil.fromDartColor(Color.fromARGB(255, 241, 109, 109)),
+        barColor: charts.ColorUtil.fromDartColor(
+            const Color.fromARGB(255, 241, 109, 109)),
       ),
     );
   }
 }
 
 @override
+// Build the Pie Chart
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
-      title: Text('Current Status of your Budget'),
+      title: const Text('Current Status of your Budget'),
       centerTitle: true,
     ),
     body: Center(
       child: Container(
         height: 400,
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Card(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: <Widget>[
-                Text(
+                const Text(
                   "Current Status of your Budget",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 Expanded(
                   child: charts.BarChart(
                     _getSeriesData(),
                     animate: true,
-                    domainAxis: charts.OrdinalAxisSpec(
+                    domainAxis: const charts.OrdinalAxisSpec(
                         renderSpec:
                             charts.SmallTickRendererSpec(labelRotation: 60)),
                   ),

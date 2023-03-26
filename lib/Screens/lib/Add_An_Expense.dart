@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:email_validator/email_validator.dart';
 import 'package:moncierge/General/budget.dart';
 import 'package:moncierge/General/expense.dart';
 import 'package:moncierge/General/user.dart';
+import 'package:moncierge/Screens/lib/Reusable/alert_message.dart';
 import 'package:moncierge/Screens/lib/budgets_list.dart';
 import 'package:moncierge/Utilities/budget_utils.dart';
 
 class AddAnExpensePage extends StatefulWidget {
-  User user;
-  Budget budget;
-  List<String> categories = [];
-  AddAnExpensePage({required this.user, required this.budget});
+  final User user;
+  final Budget budget;
+  final List<String> categories = [];
+  AddAnExpensePage({super.key, required this.user, required this.budget});
   @override
   _AddAnExpensePageState createState() => _AddAnExpensePageState();
 }
@@ -31,9 +31,9 @@ class _AddAnExpensePageState extends State<AddAnExpensePage> {
 
 // Create a Form widget.
 class MyCustomForm extends StatefulWidget {
-  Budget budget;
-  User user;
-  MyCustomForm({super.key, required this.budget, required this.user});
+  final Budget budget;
+  final User user;
+  const MyCustomForm({super.key, required this.budget, required this.user});
   @override
   MyCustomFormState createState() {
     return MyCustomFormState();
@@ -58,23 +58,26 @@ class MyCustomFormState extends State<MyCustomForm> {
 
   @override
   Widget build(BuildContext context) {
+    // Initialise with default values
     DateTime creationTime = DateTime.now();
     String category = '';
     return FutureBuilder(
         future: BudgetUtils.getCategoriesForBudget(widget.budget.budgetId),
         builder: (context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData == false) {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           category = snapshot.data![0];
           if (_selectedCategory == '') _selectedCategory = category;
           return SingleChildScrollView(
+            // Add expense form
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  // Amount field
                   TextFormField(
                       controller: amountController,
                       keyboardType: TextInputType.number,
@@ -83,6 +86,7 @@ class MyCustomFormState extends State<MyCustomForm> {
                         hintText: 'Enter Amount Spent',
                         labelText: 'Amount',
                       )),
+                  // Receiver field
                   TextFormField(
                       controller: receiverController,
                       decoration: const InputDecoration(
@@ -90,6 +94,7 @@ class MyCustomFormState extends State<MyCustomForm> {
                         hintText: 'Whom was the payment done to',
                         labelText: 'Receiver',
                       )),
+                  // Payment mode field
                   TextFormField(
                       controller: payementModeController,
                       decoration: const InputDecoration(
@@ -97,6 +102,7 @@ class MyCustomFormState extends State<MyCustomForm> {
                         hintText: 'UPI, Cash, Bank Transaction etc.',
                         labelText: 'Payment Mode',
                       )),
+                  // Category field
                   DropdownButtonFormField(
                       decoration: const InputDecoration(
                         icon: Icon(Icons.category),
@@ -114,6 +120,7 @@ class MyCustomFormState extends State<MyCustomForm> {
                           _selectedCategory = newValue!;
                         });
                       }),
+                  // Date of Payment field
                   TextFormField(
                       controller: datePaymentMadeController,
                       decoration: InputDecoration(
@@ -125,13 +132,15 @@ class MyCustomFormState extends State<MyCustomForm> {
                         ),
                       ),
                       readOnly: true),
+                  // Description field (Optional)
                   TextFormField(
                       controller: descriptionController,
                       decoration: const InputDecoration(
                         icon: Icon(Icons.notes),
-                        hintText: 'Description',
+                        hintText: 'Description (Optional)',
                         labelText: 'Anything you want',
                       )),
+                  // Submit button
                   Container(
                       padding: const EdgeInsets.only(left: 150.0, top: 0.0),
                       child: ElevatedButton(
@@ -139,6 +148,7 @@ class MyCustomFormState extends State<MyCustomForm> {
                         onPressed: () async {
                           // It returns true if the form is valid, otherwise returns false
                           if (_formKey.currentState!.validate()) {
+                            //Check if all required fields are entered
                             if (amountController.text == '' ||
                                 receiverController.text == '' ||
                                 payementModeController.text == '' ||
@@ -147,18 +157,9 @@ class MyCustomFormState extends State<MyCustomForm> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) => AlertDialog(
-                                              title:
-                                                  const Text('Invalid Input'),
-                                              content: const Text(
-                                                  'Please fill all the fields appropriately'),
-                                              actions: [
-                                                TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: const Text('OK'))
-                                              ])));
+                                      builder: (_) => alertMessage(context,
+                                          content:
+                                              'Please fill all the compulsory fields!')));
                             } else {
                               try {
                                 int amount = int.parse(amountController.text);
@@ -179,23 +180,14 @@ class MyCustomFormState extends State<MyCustomForm> {
                                         creationTime,
                                         paymentAddedTime);
                                 if (!expenseAdded) {
+                                  // check if expense addition was successful
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) => AlertDialog(
-                                                  title: const Text(
-                                                      'Invalid Input'),
-                                                  content: const Text(
-                                                      'Please fill all the fields appropriately'),
-                                                  actions: [
-                                                    TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child: const Text('OK'))
-                                                  ])));
+                                          builder: (_) => alertMessage(context,
+                                              content: 'Enter valid inputs!')));
                                 } else {
+                                  // Create expense object
                                   Expenses(
                                       userId: widget.user.email,
                                       budgetId: widget.budget.budgetId,
@@ -213,9 +205,8 @@ class MyCustomFormState extends State<MyCustomForm> {
                                   timeStampAddedString =
                                       timeStampAddedString.substring(
                                           0, timeStampAddedString.length - 7);
-                                  widget.budget.expenses.add(widget.user.email +
-                                      '|' +
-                                      timeStampAddedString);
+                                  widget.budget.expenses.add(
+                                      '${widget.user.email}|$timeStampAddedString');
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -226,35 +217,14 @@ class MyCustomFormState extends State<MyCustomForm> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) => AlertDialog(
-                                                title:
-                                                    const Text('Invalid Input'),
-                                                content: const Text(
-                                                    'Please fill all the fields appropriately'),
-                                                actions: [
-                                                  TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: const Text('OK'))
-                                                ])));
+                                        builder: (_) => alertMessage(context)));
                               }
                             }
                           } else {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => AlertDialog(
-                                            title: const Text('Invalid Input'),
-                                            content: const Text(
-                                                'Please fill all the fields appropriately'),
-                                            actions: [
-                                              TextButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: const Text('OK'))
-                                            ])));
+                                    builder: (_) => alertMessage(context)));
                           }
                         },
                       )),
@@ -265,6 +235,7 @@ class MyCustomFormState extends State<MyCustomForm> {
         });
   }
 
+  // Date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,

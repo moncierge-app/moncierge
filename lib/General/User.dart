@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+// User class to store user details and manage them
 class User {
   // Creating Field inside the class
   var currentUser;
@@ -11,14 +12,17 @@ class User {
       []; //list of budget IDs pointing to budgets that the user supervises
   List<String> budgetIDs = []; // list of budgets that the user is a member of
 
+  // Default constructor
   User(
       {required this.name,
       required this.email,
       required this.phoneNumber,
       required this.password});
 
+  // Manually defined constructor - using only email and password
   User.emailPassword({required this.email, required this.password});
 
+  // Manually defined constructor - using name, email, phonenumber, budget lists (supervisor and members of)
   User.withBudgetLists(
       {required this.name,
       required this.email,
@@ -79,7 +83,6 @@ class User {
   }
 
   //Authentication with Firebase
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   get user => _auth.currentUser;
 
@@ -99,11 +102,9 @@ class User {
   //SIGN IN METHOD
   Future<bool> signIn({required String email, required String password}) async {
     try {
-      var e = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
       currentUser = email;
       return true;
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       return false;
     }
   }

@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebaseAuth;
 
 class BudgetPage extends StatefulWidget {
   User user;
-  BudgetPage({required this.user});
+  BudgetPage({super.key, required this.user});
   @override
   State<BudgetPage> createState() => _BudgetPage();
 }
@@ -28,13 +28,15 @@ class _BudgetPage extends State<BudgetPage> {
                 minHeight: h,
               ),
               child: Column(children: [
+                // Button to sign out
                 TextButton(
                   child: const Text('Sign Out'),
                   onPressed: () async {
                     widget.user.signOut();
                     Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginDemo()),
+                        MaterialPageRoute(
+                            builder: (context) => const LoginDemo()),
                         (route) => false);
                   },
                 ),
@@ -71,13 +73,15 @@ class _BudgetPage extends State<BudgetPage> {
                         child: const Icon(Icons.add),
                       ),
                     ),
+                    // Button to create a new budget
                     const Text("Create new budget",
                         style: TextStyle(
                           fontSize: 28,
                         )),
                   ]),
                 ),
-                Text(
+                // THE BUDGETS USER IS A MEMBER OF
+                const Text(
                   'Member',
                   style: TextStyle(fontSize: 19),
                 ),
@@ -191,7 +195,7 @@ class _BudgetPage extends State<BudgetPage> {
                                                                   budgetID: snapshot
                                                                       .data![
                                                                           index]
-                                                                      .budgetId)));
+                                                                      .budgetId, isMember: true)));
                                                     },
                                                     child: const Icon(
                                                         Icons.arrow_forward,
@@ -258,8 +262,7 @@ class _BudgetPage extends State<BudgetPage> {
                                                             return AlertDialog(
                                                               title: const Text(
                                                                   'Users Using this Budget'),
-                                                              content:
-                                                                  Container(
+                                                              content: SizedBox(
                                                                 width: double
                                                                     .minPositive,
                                                                 child: ListView
@@ -336,8 +339,7 @@ class _BudgetPage extends State<BudgetPage> {
                                                             return AlertDialog(
                                                               title: const Text(
                                                                   'List of supervisor'),
-                                                              content:
-                                                                  Container(
+                                                              content: SizedBox(
                                                                 width: double
                                                                     .minPositive,
                                                                 child: ListView
@@ -388,11 +390,13 @@ class _BudgetPage extends State<BudgetPage> {
                             ),
                           ),
                         );
-                      } else
-                        return Center(child: CircularProgressIndicator());
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                     }),
-                SizedBox(height: 10),
-                Text(
+                const SizedBox(height: 10),
+                // THE BUDGETS USER IS A SUPERVISOR OF
+                const Text(
                   'Supervisor',
                   style: TextStyle(fontSize: 19),
                 ),
@@ -506,7 +510,7 @@ class _BudgetPage extends State<BudgetPage> {
                                                                   budgetID: snapshot
                                                                       .data![
                                                                           index]
-                                                                      .budgetId)));
+                                                                      .budgetId, isMember: false)));
                                                     },
                                                     child: const Icon(
                                                         Icons.arrow_forward,
@@ -573,8 +577,7 @@ class _BudgetPage extends State<BudgetPage> {
                                                             return AlertDialog(
                                                               title: const Text(
                                                                   'Users Using this Budget'),
-                                                              content:
-                                                                  Container(
+                                                              content: SizedBox(
                                                                 width: double
                                                                     .minPositive,
                                                                 child: ListView
@@ -651,8 +654,7 @@ class _BudgetPage extends State<BudgetPage> {
                                                             return AlertDialog(
                                                               title: const Text(
                                                                   'List of supervisor'),
-                                                              content:
-                                                                  Container(
+                                                              content: SizedBox(
                                                                 width: double
                                                                     .minPositive,
                                                                 child: ListView
@@ -703,8 +705,9 @@ class _BudgetPage extends State<BudgetPage> {
                             ),
                           ),
                         );
-                      } else
-                        return Center(child: CircularProgressIndicator());
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                     })
               ]),
             ),
@@ -712,12 +715,16 @@ class _BudgetPage extends State<BudgetPage> {
         ));
   }
 
+  // Fetch user's budgets
+
+  // Member budgets
   Future<List<Budget>> getMemberBudgets() async {
     List<Budget> budgets =
         await BudgetUtils.getBudgetsForUser(widget.user.email);
     return budgets;
   }
 
+  // Supervisor budgets
   Future<List<Budget>> getSupervisorBudgets() async {
     List<Budget> budgets =
         await BudgetUtils.getBudgetsForSupervisor(widget.user.email);

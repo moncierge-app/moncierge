@@ -3,6 +3,7 @@ import 'package:mailer/mailer.dart';
 // ignore: depend_on_referenced_packages
 import 'package:mailer/smtp_server.dart';
 
+// Send notification message
 class NotificationUtils {
   static String email = 'vdesai2029@gmail.com';
   static String password = 'fbnpdyjykfsozpfz';

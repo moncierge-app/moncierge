@@ -2,20 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:moncierge/General/budget.dart';
 import 'package:moncierge/General/user.dart';
+import 'package:moncierge/Screens/lib/Reusable/alert_message.dart';
+import 'package:moncierge/Screens/lib/budgets_list.dart';
 import 'package:moncierge/Utilities/budget_utils.dart';
 
 class AddBudget extends StatefulWidget {
-  User user;
-  AddBudget({required this.user});
+  final User user;
+  const AddBudget({super.key, required this.user});
   @override
   State<AddBudget> createState() => _AddBudget();
-}
-
-bool validateEmail(String value) {
-  String pattern =
-      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-  RegExp regex = RegExp(pattern);
-  return (!regex.hasMatch(value)) ? false : true;
 }
 
 class _AddBudget extends State<AddBudget> {
@@ -65,11 +60,13 @@ class _AddBudget extends State<AddBudget> {
               decoration: const BoxDecoration(
                 color: Colors.white,
               ),
+              // Form for bugdet creation
               child: Form(
                 key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Budget name field
                     TextFormField(
                       controller: budgetNameController,
                       decoration: const InputDecoration(
@@ -84,6 +81,7 @@ class _AddBudget extends State<AddBudget> {
                         }
                       },
                     ),
+                    // Total amount field
                     TextFormField(
                       controller: totalAmountController,
                       decoration: const InputDecoration(
@@ -99,6 +97,7 @@ class _AddBudget extends State<AddBudget> {
                         }
                       },
                     ),
+                    // End Date field
                     TextFormField(
                       controller: endDateController,
                       decoration: InputDecoration(
@@ -117,6 +116,7 @@ class _AddBudget extends State<AddBudget> {
                         return null;
                       },
                     ),
+                    // Category field
                     TextButton(
                       onPressed: () {
                         addCategory(context);
@@ -129,6 +129,7 @@ class _AddBudget extends State<AddBudget> {
                             fontWeight: FontWeight.bold),
                       ),
                     ),
+                    // Members field
                     TextButton(
                       onPressed: () {
                         addMember(context);
@@ -144,6 +145,7 @@ class _AddBudget extends State<AddBudget> {
                     const SizedBox(
                       height: 20,
                     ),
+                    // Supervisors field
                     TextButton(
                       onPressed: () {
                         addSupervisor(context);
@@ -162,6 +164,7 @@ class _AddBudget extends State<AddBudget> {
                     ),
                     ElevatedButton(
                       onPressed: () async {
+                        // Check if any compulsory field is empty
                         if (members.isNotEmpty &&
                             categories.isNotEmpty &&
                             budgetNameController.text != '' &&
@@ -169,43 +172,60 @@ class _AddBudget extends State<AddBudget> {
                             endDateController.text != '') {
                           totalAmount = int.parse(totalAmountController.text);
                           budgetName = budgetNameController.text;
-                          Budget budget = Budget(
-                              '${widget.user.email}|$creationTime',
-                              budgetName,
-                              creationTime,
-                              endTime,
-                              members,
-                              supervisors,
-                              [],
-                              categories,
-                              totalAmount,
-                              0);
-                          widget.user.budgetIDs.add(budget.budgetId);
-                          await BudgetUtils.createBudget(
-                              budgetName,
-                              creationTime,
-                              widget.user.email,
-                              endTime,
-                              supervisors,
-                              members,
-                              categories,
-                              totalAmount);
-                          Navigator.of(context).pop();
+
+                          // Check if sum of limits of all categories doesn't exceed the budget limit
+                          int totalOfCategories = 0;
+                          for (Category category in categories) {
+                            totalOfCategories += category.totalAmount;
+                          }
+                          if (totalOfCategories > totalAmount) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => alertMessage(context,
+                                        content:
+                                            'The categorywise sum of limits should not exceed overall limit!')));
+                          } else {
+                            // create budget object
+                            Budget budget = Budget(
+                                '${widget.user.email}|$creationTime',
+                                budgetName,
+                                creationTime,
+                                endTime,
+                                members,
+                                supervisors,
+                                [],
+                                categories,
+                                totalAmount,
+                                0);
+                            // add to user's budget list
+                            widget.user.budgetIDs.add(budget.budgetId);
+                            // Add budget to database
+                            await BudgetUtils.createBudget(
+                                budgetName,
+                                creationTime,
+                                widget.user.email,
+                                endTime,
+                                supervisors,
+                                members,
+                                categories,
+                                totalAmount);
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            // redirect to budget lists screen
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        BudgetPage(user: widget.user)));
+                          }
                         } else {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => AlertDialog(
-                                          title: const Text('Invalid Input'),
-                                          content: const Text(
-                                              'Please fill all the fields appropriately'),
-                                          actions: [
-                                            TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text('Ok'))
-                                          ])));
+                                  builder: (_) => alertMessage(context,
+                                      content:
+                                          'Budget creation failed due to invalid inputs!')));
                         }
                       },
                       child: const Text(
@@ -225,6 +245,7 @@ class _AddBudget extends State<AddBudget> {
     );
   }
 
+  //popup widget to add category
   Future addCategory(context) => showDialog(
       context: context,
       builder: (context) {
@@ -232,19 +253,21 @@ class _AddBudget extends State<AddBudget> {
         TextEditingController warningAmountController = TextEditingController();
         TextEditingController totalAmountController = TextEditingController();
         return AlertDialog(
-          title: const Text("Add Category name"),
+          title: const Text("Add Category"),
           content: Scaffold(
             body: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
+                  // Category name field
                   TextFormField(
                     controller: categoryNameController,
                     autofocus: true,
                     decoration:
                         const InputDecoration(labelText: "Enter Category name"),
                   ),
+                  // Category warning amount field
                   TextFormField(
                     controller: warningAmountController,
                     keyboardType: TextInputType.number,
@@ -252,6 +275,7 @@ class _AddBudget extends State<AddBudget> {
                     decoration: const InputDecoration(
                         labelText: "Enter warning amount"),
                   ),
+                  // Category total amount field
                   TextFormField(
                     controller: totalAmountController,
                     keyboardType: TextInputType.number,
@@ -266,42 +290,29 @@ class _AddBudget extends State<AddBudget> {
           actions: [
             TextButton(
                 onPressed: () {
+                  // Check if any field is empty
                   if (categoryNameController.text == '' ||
                       warningAmountController.text == '' ||
                       totalAmountController.text == '') {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => AlertDialog(
-                                    title: const Text('Invalid Input'),
-                                    content: const Text(
-                                        'Please fill all the fields appropriately'),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text('Ok'))
-                                    ])));
+                            builder: (_) => alertMessage(context,
+                                content:
+                                    'Please fill all the compulsory fields!')));
                   } else {
                     int warningAmount = int.parse(warningAmountController.text),
                         totalAmount = int.parse(totalAmountController.text);
                     if (warningAmount > totalAmount) {
+                      // check if warning amount > total amount
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => AlertDialog(
-                                      title: const Text('Invalid Input'),
-                                      content: const Text(
-                                          'Please fill all the fields appropriately'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('Ok'))
-                                      ])));
+                              builder: (_) => alertMessage(context,
+                                  content:
+                                      'Warning Amount must not exceed Total Amount!')));
                     } else {
+                      // add to categoris list
                       categories.add(Category(
                           category: categoryNameController.text,
                           warningAmount: warningAmount,
@@ -316,13 +327,15 @@ class _AddBudget extends State<AddBudget> {
         );
       });
 
+  //popup widget to add member
   Future addMember(context) {
     return showDialog(
         context: context,
         builder: (context) {
           TextEditingController memberIDController = TextEditingController();
           return AlertDialog(
-            title: const Text("Add Member Id"),
+            title: const Text("Add Member"),
+            // Member ID field
             content: TextFormField(
               controller: memberIDController,
               autofocus: true,
@@ -331,6 +344,7 @@ class _AddBudget extends State<AddBudget> {
             actions: [
               TextButton(
                   onPressed: () async {
+                    //Check if input is empty or invalid
                     if (memberIDController.text != '' &&
                         await BudgetUtils.checkIfUserExists(
                             memberIDController.text)) {
@@ -340,17 +354,8 @@ class _AddBudget extends State<AddBudget> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => AlertDialog(
-                                      title: const Text('Invalid Input'),
-                                      content: const Text(
-                                          'Please fill all the fields appropriately'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('Ok'))
-                                      ])));
+                              builder: (_) => alertMessage(context,
+                                  content: 'Please enter a valid user ID')));
                     }
                   },
                   child: const Text('SUBMIT'))
@@ -359,13 +364,15 @@ class _AddBudget extends State<AddBudget> {
         });
   }
 
+  //popup widget to add supervisor
   Future addSupervisor(context) => showDialog(
         context: context,
         builder: (context) {
           TextEditingController supervisorIDController =
               TextEditingController();
           return AlertDialog(
-            title: const Text("Add Supervisor ID"),
+            title: const Text("Add Supervisor"),
+            //supervisor id field
             content: TextFormField(
               controller: supervisorIDController,
               autofocus: true,
@@ -375,6 +382,7 @@ class _AddBudget extends State<AddBudget> {
             actions: [
               TextButton(
                   onPressed: () async {
+                    // Check if supervisor id is empty or invalid
                     if (supervisorIDController.text != '' &&
                         await BudgetUtils.checkIfUserExists(
                             supervisorIDController.text)) {
@@ -384,17 +392,8 @@ class _AddBudget extends State<AddBudget> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => AlertDialog(
-                                      title: const Text('Invalid Input'),
-                                      content: const Text(
-                                          'Please fill all the fields appropriately'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('Ok'))
-                                      ])));
+                              builder: (_) => alertMessage(context,
+                                  content: 'Please add a valid user ID')));
                     }
                   },
                   child: const Text('SUBMIT'))
@@ -403,6 +402,7 @@ class _AddBudget extends State<AddBudget> {
         },
       );
 
+  //date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,

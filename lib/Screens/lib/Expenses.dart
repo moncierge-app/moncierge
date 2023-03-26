@@ -7,9 +7,14 @@ import 'package:moncierge/Utilities/budget_utils.dart';
 import 'package:pie_chart/pie_chart.dart';
 
 class ExpensesPage extends StatefulWidget {
-  User user;
-  String budgetID;
-  ExpensesPage({required this.user, required this.budgetID});
+  final User user;
+  final String budgetID;
+  final bool isMember;
+  const ExpensesPage(
+      {super.key,
+      required this.user,
+      required this.budgetID,
+      required this.isMember});
 
   @override
   _ExpensesPageState createState() => _ExpensesPageState();
@@ -42,36 +47,47 @@ class _ExpensesPageState extends State<ExpensesPage> {
                 future: getBudgetandExpenses(),
                 builder: (context, AsyncSnapshot snapshot) {
                   if (snapshot.hasData == false) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   return Column(children: <Widget>[
                     const SizedBox(height: 20),
-                    Container(
-                      height: 40,
-                      width: 250,
-                      decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => AddAnExpensePage(
-                                      user: widget.user, budget: budget)));
-                        },
-                        icon: const SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: Icon(Icons.add, color: Colors.black),
-                        ),
-                        label: const Text(
-                          'Add an Expense',
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
+                    // If the user is member, they can add expense
+                    Visibility(
+                      visible: widget.isMember,
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 40,
+                            width: 250,
+                            decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: TextButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => AddAnExpensePage(
+                                            user: widget.user,
+                                            budget: budget)));
+                              },
+                              icon: const SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: Icon(Icons.add, color: Colors.black),
+                              ),
+                              label: const Text(
+                                'Add an Expense',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    // Details of budget
                     Container(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -121,48 +137,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
                             ),
                           ],
                         )),
+                        // Pie chart of categorywise split of budget
                     const SizedBox(height: 10),
-                    FittedBox(
-                      child: DataTable(
-                        columnSpacing: 10,
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'Paid On',
-                              overflow: TextOverflow.visible,
-                              softWrap: true,
-                              maxLines: 3,
-                            ),
-                          ),
-                          DataColumn(label: Text('Spent By')),
-                          DataColumn(label: Text('Paid to')),
-                          DataColumn(label: Text('Category')),
-                          DataColumn(label: Text('Amount')),
-                          DataColumn(label: Text('Mode')),
-                          DataColumn(label: Text('Decription'))
-                        ],
-                        rows: List<DataRow>.generate(
-                          expenses.length,
-                          (index) => DataRow(
-                            cells: [
-                              DataCell(Text('${expenses[index].getUserId}')),
-                              DataCell(Text(
-                                  '${expenses[index].timeOfPayment.day}/${expenses[index].timeOfPayment.month}/${expenses[index].timeOfPayment.year}')),
-                              DataCell(Text(expenses[index].receiver)),
-                              DataCell(Text(expenses[index].category)),
-                              DataCell(
-                                Text(expenses[index].amount.toString()),
-                              ),
-                              DataCell(
-                                  Text(expenses[index].paymentMode.toString())),
-                              DataCell(Text(expenses[index].description))
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    (expenses.length > 0)
+                    (expenses.isNotEmpty)
                         ? Column(
                             children: [
                               const Text('Categorywise split',
@@ -186,7 +163,56 @@ class _ExpensesPageState extends State<ExpensesPage> {
                               ),
                             ],
                           )
-                        : Text('---'),
+                        : const Text('---'),
+                    const SizedBox(height: 20),
+                    // Expenses table of budget
+                    const Text('Expenses', style: TextStyle(fontSize: 18)),
+                    (expenses.isNotEmpty)
+                        ? SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: FittedBox(
+                              child: DataTable(
+                                columnSpacing: 10,
+                                columns: const [
+                                  DataColumn(
+                                    label: Text(
+                                      'Amount',
+                                      overflow: TextOverflow.visible,
+                                      softWrap: true,
+                                      maxLines: 3,
+                                    ),
+                                  ),
+                                  DataColumn(label: Text('Category')),
+                                  DataColumn(label: Text('Spent By')),
+                                  DataColumn(label: Text('Paid to')),
+                                  DataColumn(label: Text('Paid On')),
+                                  DataColumn(label: Text('Mode')),
+                                  DataColumn(label: Text('Decription'))
+                                ],
+                                rows: List<DataRow>.generate(
+                                  expenses.length,
+                                  (index) => DataRow(
+                                    cells: [
+                                      DataCell(
+                                        Text(expenses[index].amount.toString()),
+                                      ),
+                                      DataCell(Text(expenses[index].category)),
+                                      DataCell(Text(expenses[index].getUserId)),
+                                      DataCell(Text(expenses[index].receiver)),
+                                      DataCell(Text(
+                                          '${expenses[index].timeOfPayment.day}/${expenses[index].timeOfPayment.month}/${expenses[index].timeOfPayment.year}')),
+                                      DataCell(Text(expenses[index]
+                                          .paymentMode
+                                          .toString())),
+                                      DataCell(
+                                          Text(expenses[index].description))
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : const Text('---'),
                   ]);
                 }),
             //child:
@@ -194,6 +220,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
     );
   }
 
+  // Get budget details and its coressponding expense details
   Future<List<Expenses>> getBudgetandExpenses() async {
     String budgetID = widget.budgetID;
     budget = await BudgetUtils.getBudget(budgetID);

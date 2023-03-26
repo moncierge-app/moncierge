@@ -1,5 +1,6 @@
 import 'package:moncierge/General/expense.dart';
 
+// Category class to store the details of categories of expenses and acces them
 class Category {
   late String category;
   late int warningAmount;
@@ -24,19 +25,21 @@ class Category {
   }
 }
 
+// Budget Class to store details of budget
 class Budget {
   late String budgetId;
   late String budgetName;
   late DateTime creationTime; //current time taken at the time of creation
   late DateTime endTime; // set by superviser
   String userId = ''; // superviser
-  late List<String>
-      membersId; // List of members that are going to share the budget
+  late List<String> membersId; // List of members that are going to share the budget
   late List<String> supervisorsId;
   late List<String> expenses;
   late List<Category> categories;
   int totalAmount = 0;
   int amountUsed = 0;
+
+  // Default constructor
   Budget(
       String budgetId,
       String budgetName,
@@ -58,8 +61,8 @@ class Budget {
     this.totalAmount = totalAmount;
     this.amountUsed = amountUsed;
   }
-  Budget.withName();
-//   getter and setter method
+
+  // getter and setter method
   set setBudgetAmount(int budgetAmount) {
     totalAmount = budgetAmount;
   }
@@ -93,13 +96,6 @@ class Budget {
   }
 
   void addExpense(String memId, Expenses expense) {
-//     Expenses expense= Expense expense = Expense(
-//     addTime: DateTime.now(),
-//     paymentTime: DateTime.now().add(Duration(days: 1)),
-//     userId: 'user123',
-//     budgetId: 'budget456',
-//     description: 'Office supplies',
-//     );
     amountUsed += expense.amount;
   }
 
@@ -111,8 +107,7 @@ class Budget {
 
   void warningAlert() {
     if (DateTime.now().compareTo(endTime) > 0) {
-      print(
-          " Your budget duration is over now , you can update if you want!!!");
+      print("Your budget duration is over now , you can update if you want!!!");
     }
   }
 

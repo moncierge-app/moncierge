@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:moncierge/General/user.dart';
 import 'package:moncierge/Screens/lib/sign_up.dart';
 import 'package:moncierge/Screens/lib/budgets_list.dart';
-import 'package:moncierge/Utilities/budget_utils.dart';
-import 'package:moncierge/Utilities/notification_utils.dart';
 import 'package:moncierge/Utilities/user_utils.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: LoginDemo(),
     );
@@ -21,10 +21,13 @@ class MyApp extends StatelessWidget {
 }
 
 class LoginDemo extends StatefulWidget {
+  const LoginDemo({super.key});
+
   @override
   _LoginDemoState createState() => _LoginDemoState();
 }
 
+// Login screen
 class _LoginDemoState extends State<LoginDemo> {
   final _formKey = GlobalKey<FormState>();
   String? _email, _password;
@@ -37,6 +40,7 @@ class _LoginDemoState extends State<LoginDemo> {
           title: const Text("Welcome to Moncierge"),
         ),
         body: SingleChildScrollView(
+          // Login form
           child: Form(
             key: _formKey,
             child: Column(
@@ -44,12 +48,13 @@ class _LoginDemoState extends State<LoginDemo> {
                 Padding(
                   padding: const EdgeInsets.only(top: 5.0),
                   child: Center(
-                    child: Container(
+                    child: SizedBox(
                         width: 1000,
                         height: 300,
                         child: Image.asset('assets/body.jpeg')),
                   ),
                 ),
+                // Email id field
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: TextFormField(
@@ -65,6 +70,7 @@ class _LoginDemoState extends State<LoginDemo> {
                     onSaved: (value) => _email = value!,
                   ),
                 ),
+                // Password field
                 Padding(
                   padding: const EdgeInsets.only(
                       left: 15.0, right: 15.0, top: 15, bottom: 0),
@@ -91,6 +97,7 @@ class _LoginDemoState extends State<LoginDemo> {
                     style: TextStyle(color: Colors.blue, fontSize: 15),
                   ),
                 ),
+                // Login button
                 Container(
                   height: 50,
                   width: 250,
@@ -99,9 +106,11 @@ class _LoginDemoState extends State<LoginDemo> {
                       borderRadius: BorderRadius.circular(20)),
                   child: TextButton(
                     onPressed: () async {
+                      // check if form state if valid
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
 
+                        // create a user object
                         User user = User.emailPassword(
                             email: _email!, password: _password!);
                         //Firebase authentication
@@ -115,13 +124,11 @@ class _LoginDemoState extends State<LoginDemo> {
                               MaterialPageRoute(
                                   builder: (_) => BudgetPage(user: user)));
                         } else {
-                          //   Navigator.push(
-                          // context, MaterialPageRoute(builder: (_) => BudgetPage()));
                           showDialog(
                               context: context,
                               builder: (context) => const AlertDialog(
                                     title: Text('Error'),
-                                    content: Text('Login Failed'),
+                                    content: Text('Invalid Credentials!'),
                                   ));
                         }
                       }
@@ -135,11 +142,13 @@ class _LoginDemoState extends State<LoginDemo> {
                 const SizedBox(
                   height: 50,
                 ),
+                // Signup option for new users
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SignUpPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const SignUpPage()),
                     );
                   },
                   child: const Text('New User? Create Account'),
