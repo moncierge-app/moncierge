@@ -3,6 +3,30 @@ import 'package:moncierge/General/user.dart';
 import 'package:moncierge/Screens/lib/budgets_list.dart';
 import 'package:moncierge/Utilities/user_utils.dart';
 
+class EmailFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Email can\'t be empty' : null;
+  }
+}
+
+class PasswordFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Password can\'t be empty' : null;
+  }
+}
+
+class NameFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Name can\'t be empty' : null;
+  }
+}
+
+class MobileNumberFieldValidator {
+  static String? validate(String? value) {
+    return value!.isEmpty ? 'Mobile Number can\'t be empty' : null;
+  }
+}
+
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -12,7 +36,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
-  String? _email, _password, _firstName, _mobile;
+  String? _email, _password, _name, _mobile;
 
   @override
   Widget build(BuildContext context) {
@@ -38,48 +62,28 @@ class _SignUpPageState extends State<SignUpPage> {
                   // Email field
                   TextFormField(
                     decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      return null;
-                    },
+                    validator: EmailFieldValidator.validate,
                     onSaved: (value) => _email = value!,
                   ),
                   // Password field
                   TextFormField(
                     decoration: const InputDecoration(labelText: 'Password'),
                     obscureText: true,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      return null;
-                    },
+                    validator: PasswordFieldValidator.validate,
                     onSaved: (value) => _password = value!,
                   ),
                   // Name field
                   TextFormField(
                     decoration: const InputDecoration(labelText: 'Name'),
                     obscureText: false,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter your Name';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _firstName = value!,
+                    validator: NameFieldValidator.validate,
+                    onSaved: (value) => _name = value!,
                   ),
                   // Mobile number field
                   TextFormField(
                     decoration: const InputDecoration(labelText: 'Mobile No.'),
                     obscureText: false,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter your Mobile Number';
-                      }
-                      return null;
-                    },
+                    validator: MobileNumberFieldValidator.validate,
                     onSaved: (value) => _mobile = value!,
                   ),
                   // submit button
@@ -92,7 +96,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           _formKey.currentState!.save();
                           // Create user object
                           User newUser = User(
-                              name: _firstName!,
+                              name: _name!,
                               phoneNumber: _mobile!,
                               email: _email!,
                               password: _password!);

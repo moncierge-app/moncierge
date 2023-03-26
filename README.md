@@ -78,6 +78,9 @@ Some working snippets of the project (UI or API or command line)
 ![Expense Collection view](./images/expense_collection.jpeg)
 ![Budget Collection View](./images/budget_collection.jpeg)
 
+### Unit Test Snippets
+![Unit Test Cases](./images/tests.jpg)
+
 <a id="instructions-to-run"></a>
 ### 👩‍🏫 Instructions to Run
 * To run the Moncierge application:
