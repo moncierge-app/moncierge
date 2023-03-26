@@ -8,6 +8,7 @@
 * [Tech Stack](#tech-stack)
 * [Design and Architecture](#design-and-architecture)
 * [Snippets](#snippets)
+* [Instructions to Run](#instructions-to-run)
 * [Future Scope](#future-scope)
 * [References](#references)
 
@@ -60,6 +61,29 @@ Describes the high level design
 <a id="snippets"></a>
 ### 💡 Snippets
 Some working snippets of the project (UI or API or command line)
+![Sign Up Screen](./images/signup_screen.jpeg)
+![Login Screen](./images/login_screen.jpeg)
+![Main Screen](./images/main_screen.jpeg)
+![Members of Budget Screen](./images/members_of_budget.jpeg)
+![Create Budget Screen](./images/create_budget_screen.jpeg)
+![Add Category Screen](./images/add_category_screen.jpeg)
+![Add Expense Page](./images/add_expense_screen.jpeg)
+![Budget Details / Expenses Page](./images/expense_screen1.jpeg)
+![Budget Details / Expenses Page Scrolled](./images/expense_screen2.jpeg)
+![Notification via email](./images/notification_via_email.jpeg)
+
+### 🗃️ Some snippets of Database structure
+![User Collection Outer view](./images/user_collection1.jpeg)
+![User Collection Inner view](./images/user_collection2.jpeg)
+![Expense Collection view](./images/expense_collection.jpeg)
+![Budget Collection View](./images/budget_collection.jpeg)
+
+<a id="instructions-to-run"></a>
+### 👩‍🏫 Instructions to Run
+* To run the Moncierge application:
+    * Find the `app-release.apk` file under `/build/app/outputs/flutter-apk/` folder. 
+    * Download the apk file in an Android device and install it.
+    * Run the application.
 
 <a id="future-scope"></a>
 ### 🚀 Future Scope
