@@ -92,8 +92,15 @@ Some working snippets of the project (UI or API or command line)
 ### 🚀 Future Scope
 
 The following features can be added in revisions of this application:
-- Budget modification - Users can request budget update to the supervisor
-- Add payment gateway, which would allow users to make transactions and update expenses simultaneously.
+- Assign per User budget in a Group along with per Category budget.
+- Recurring Budget: Ask users to recreate or close the budget after it expires.
+- Budget Modification: Users can request a Budget update to the Supervisor.
+- Periodic Reporting: A weekly, monthly or user specified period for a summarized report of budget violations, savings and category wise spent over the specified time.
+- Custom Reports: Users can select a date range and/or choose a category to get a statement of the expenses.
+- Add Payment Options and Modes
+- Automatic tracking of expense based on Online payments and linking of Bank Account
+- Notification via SMS
+- Add/invite members to join the group
 
 <a id="references"></a>
 ### 📚 References
