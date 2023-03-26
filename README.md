@@ -83,8 +83,12 @@ Some working snippets of the project (UI or API or command line)
 
 <a id="instructions-to-run"></a>
 ### 👩‍🏫 Instructions to Run
-* To run the Moncierge application:
-    * Find the `app-release.apk` file under `/build/app/outputs/flutter-apk/` folder. 
+* To run the release build of Moncierge application:
+    * Find the `app-release.apk` file under `/APK/` folder. 
+    * Download the apk file in an Android device and install it.
+    * Run the application.
+* To run the debug build of Moncierge application:
+    * Find the `app-debug.apk` file under `/APK/` folder. 
     * Download the apk file in an Android device and install it.
     * Run the application.
 
